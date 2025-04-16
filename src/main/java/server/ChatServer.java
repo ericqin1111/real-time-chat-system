@@ -80,6 +80,7 @@ public class ChatServer {
 
         }
     }
+
     //广播给其他客户端
     private void castOtherClient(String message, Selector selector, SocketChannel socketChannel) throws IOException {
         //1.获取所有已经接入的channel
