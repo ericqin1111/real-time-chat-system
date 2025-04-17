@@ -1,5 +1,7 @@
 package server;
 
+import config.MyBatisConfig;
+import entity.User;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -8,10 +10,16 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import mapper.UserMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
 
 public class MainServer {
 
     private final int port;
+
+
 
     public MainServer(int port) {
         this.port = port;
@@ -95,8 +103,14 @@ public class MainServer {
     }
 
     public static void main(String[] args) throws Exception {
-        int port = 8080;
-        new MainServer(port).run();
+        MyBatisConfig.init();
+
+        // 使用封装方法执行操作
+        MyBatisConfig.execute(UserMapper.class, mapper -> {
+            List<User> users = mapper.getAll();
+            System.out.println("查询结果: " + users);
+        });
+
     }
 }
 
