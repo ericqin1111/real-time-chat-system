@@ -12,7 +12,8 @@
 在返回响应时，自定义handler这样写：
         ctx.writeAndFlush(Object);
 
-在获取post参数时这样写： Map<String, String> params = ctx.channel().attr(ParamsHandler.PARAM_KEY).get();
+在获取参数时这样写： Map<String, String> params = ctx.channel().attr(GlobalVar.PARAM_KEY).get();
 如果是get请求，千万不能尝试获取post参数；
-在获取username时这样写：String username =  ctx.channel().attr(JwtAuthHandler.USERNAME).get();
+在获取username时这样写：String username =  ctx.channel().attr(GlobalVar.USERNAME).get();
 vue的前端端口必须是8090
+连接数据库的配置在globalvar

@@ -70,6 +70,7 @@ public class ChatServer {
             //读取内容
             message+=Charset.forName("UTF-8").decode(byteBuffer);
         }
+
         //4.将channel再次注册到选择器上，监听可读状态
         socketChannel.register(selector,SelectionKey.OP_READ);
         //5.把客户端发送的消息广播到其他客户端

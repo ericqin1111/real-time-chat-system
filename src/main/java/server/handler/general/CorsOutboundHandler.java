@@ -6,6 +6,7 @@ import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
+import server.GlobalVar;
 
 public class CorsOutboundHandler extends ChannelOutboundHandlerAdapter {
 
@@ -24,7 +25,7 @@ public class CorsOutboundHandler extends ChannelOutboundHandlerAdapter {
     // 统一设置 CORS 头
     private void addCorsHeaders(FullHttpResponse response) {
         // 允许的源（可根据请求动态设置）
-        String origin = "http://localhost:8090";
+        String origin = "http://localhost:" + GlobalVar.ALLOWED_PORT;
 
         response.headers()
                 .set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, origin)

@@ -12,6 +12,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
+import server.GlobalVar;
 
 import java.util.function.Consumer;
 
@@ -25,9 +26,9 @@ public class MyBatisConfig {
         try {
             // 1. 配置 HikariCP 数据源
             HikariConfig hikariConfig = new HikariConfig();
-            hikariConfig.setJdbcUrl("jdbc:mysql://localhost:3306/chat_system");
-            hikariConfig.setUsername("root");
-            hikariConfig.setPassword("123456");
+            hikariConfig.setJdbcUrl(GlobalVar.JDBC);
+            hikariConfig.setUsername(GlobalVar.USER);
+            hikariConfig.setPassword(GlobalVar.PASS);
             hikariConfig.setMaximumPoolSize(20);
             HikariDataSource dataSource = new HikariDataSource(hikariConfig);
 

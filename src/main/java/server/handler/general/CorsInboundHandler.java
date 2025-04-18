@@ -5,6 +5,7 @@ import  io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
+import server.GlobalVar;
 
 public class CorsInboundHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
@@ -17,7 +18,7 @@ public class CorsInboundHandler extends SimpleChannelInboundHandler<FullHttpRequ
                 Unpooled.unreleasableBuffer(Unpooled.EMPTY_BUFFER) // 创建不可释放的 Buffer
         );
         PRECONFIGURED_OPTIONS_RESPONSE.headers()
-                .set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:8090")
+                .set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:" + GlobalVar.ALLOWED_PORT)
                 .set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_METHODS, "GET, POST, PUT, DELETE, OPTIONS")
                 .set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS, "Content-Type, Authorization")
                 .set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")

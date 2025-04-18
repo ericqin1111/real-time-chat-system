@@ -47,16 +47,16 @@ public class MainServer {
                             ChannelPipeline pipeline = ch.pipeline();
 
                             pipeline
-                                    .addLast(new HttpServerCodec()) // HTTP 请求解码和响应编码
-                                    .addLast(new HttpObjectAggregator(65536))// 聚合 HTTP 请求为 FullHttpRequest
+                                    .addLast("httpServerCodec",new HttpServerCodec()) // HTTP 请求解码和响应编码
+                                    .addLast("httpObjectAggregator", new HttpObjectAggregator(65536))// 聚合 HTTP 请求为 FullHttpRequest
                                     // 入站处理器
-                                    .addLast(new CorsInboundHandler())//判断跨域
-                                    .addLast(new JwtAuthHandler())//判断是否需要jwt
-                                    .addLast(new ParamsHandler())//解析参数
-                                    .addLast(new RouterHandler())//正式进入处理
+                                    .addLast("corsInboundHandler", new CorsInboundHandler())//判断跨域
+                                    .addLast("jwtAuthHandler", new JwtAuthHandler())//判断是否需要jwt
+                                    .addLast("paramsHandler", new ParamsHandler())//解析参数
+                                    .addLast("routerHandler", new RouterHandler())//正式进入处理
                                     //出站处理器
-                                    .addLast(new CorsOutboundHandler())//出站加跨域头
-                                    .addLast(new JsonOutboundEncoder());//json化数据.
+                                    .addLast("corsOutboundHandler", new CorsOutboundHandler())//出站加跨域头
+                                    .addLast("jsonOutboundEncoder", new JsonOutboundEncoder());//json化数据
 
                         }
                     })
@@ -89,8 +89,8 @@ public class MainServer {
         MyBatisConfig.init();
 
 
-        int port = 8080;
-        new MainServer(port).run();
+        new MainServer(GlobalVar.SERVER_PORT).run();
+
     }
 }
 

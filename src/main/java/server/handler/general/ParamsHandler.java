@@ -6,8 +6,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
-import io.netty.util.AttributeKey;
 import io.netty.util.CharsetUtil;
+import server.GlobalVar;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -16,8 +16,7 @@ import java.util.Map;
 public class ParamsHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     // 定义存储参数的 AttributeKey
     // AttributeKey 的作用是作为 唯一标识符，用于在 Channel 的上下文中存取数据。它本身不存储任何业务数据，只是用来标识一个存储位置。
-    public static final AttributeKey<Map<String, String>> PARAM_KEY =
-            AttributeKey.valueOf("postParams");
+
 
     //使用方法如下
     //    Map<String, String> params = ctx.channel().attr(PostParamHandler.PARAM_KEY).get();
@@ -33,7 +32,7 @@ public class ParamsHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
         Map<String, String> params = parseParams(request);
 
         // 3. 将参数存入 ctx 的 Attribute
-        ctx.channel().attr(PARAM_KEY).set(params);
+        ctx.channel().attr(GlobalVar.PARAM_KEY).set(params);
         System.out.println("ok params");
         // 4. 传递请求到业务 Handler
         ctx.fireChannelRead(request.retain());
