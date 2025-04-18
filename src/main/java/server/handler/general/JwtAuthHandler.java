@@ -22,12 +22,12 @@ public class JwtAuthHandler extends SimpleChannelInboundHandler<FullHttpRequest>
 
     // 需要认证的 API 路径前缀
     private static final List<String> SECUREFREE_PATHS = JwtAuthConfig.getSECUREFREE_PATHS();
-    private static final AttributeKey<String> USERNAME = AttributeKey.valueOf("username");
+    public static final AttributeKey<String> USERNAME = AttributeKey.valueOf("username");
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
         String uri = request.uri();
-
+        System.out.println("ok jwt auth");
         // 1. 判断是否为需要认证的路径
         if (!isSecuredFreePath(uri)) {
             // 2. 提取并验证 JWT

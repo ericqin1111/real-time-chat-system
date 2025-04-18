@@ -16,7 +16,7 @@ import java.util.Map;
 public class ParamsHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     // 定义存储参数的 AttributeKey
     // AttributeKey 的作用是作为 唯一标识符，用于在 Channel 的上下文中存取数据。它本身不存储任何业务数据，只是用来标识一个存储位置。
-    private static final AttributeKey<Map<String, String>> PARAM_KEY =
+    public static final AttributeKey<Map<String, String>> PARAM_KEY =
             AttributeKey.valueOf("postParams");
 
     //使用方法如下
@@ -34,7 +34,7 @@ public class ParamsHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
 
         // 3. 将参数存入 ctx 的 Attribute
         ctx.channel().attr(PARAM_KEY).set(params);
-
+        System.out.println("ok params");
         // 4. 传递请求到业务 Handler
         ctx.fireChannelRead(request.retain());
     }

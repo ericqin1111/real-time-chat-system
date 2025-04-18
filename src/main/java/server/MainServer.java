@@ -46,16 +46,17 @@ public class MainServer {
                         protected void initChannel(SocketChannel ch) {//ch是客户端请求channel
                             ChannelPipeline pipeline = ch.pipeline();
 
-                            pipeline //入站处理器
+                            pipeline
                                     .addLast(new HttpServerCodec()) // HTTP 请求解码和响应编码
                                     .addLast(new HttpObjectAggregator(65536))// 聚合 HTTP 请求为 FullHttpRequest
+                                    // 入站处理器
                                     .addLast(new CorsInboundHandler())//判断跨域
                                     .addLast(new JwtAuthHandler())//判断是否需要jwt
                                     .addLast(new ParamsHandler())//解析参数
                                     .addLast(new RouterHandler())//正式进入处理
                                     //出站处理器
                                     .addLast(new CorsOutboundHandler())//出站加跨域头
-                                    .addLast(new JsonOutboundEncoder());//json化数据
+                                    .addLast(new JsonOutboundEncoder());//json化数据.
 
                         }
                     })

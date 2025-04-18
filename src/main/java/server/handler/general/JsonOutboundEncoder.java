@@ -19,6 +19,7 @@ public class JsonOutboundEncoder extends ChannelOutboundHandlerAdapter {
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         // 1. 仅处理业务层返回的 Java 对象（非 HTTP 消息）
+        System.out.println("ok json0");
         if (!(msg instanceof HttpResponse) && !(msg instanceof HttpContent)) {
 
             // 2. 序列化为 JSON
@@ -42,8 +43,9 @@ public class JsonOutboundEncoder extends ChannelOutboundHandlerAdapter {
 
             // 6. 替换原始消息为 HTTP 响应
             msg = response;
+            System.out.println("ok json1");
         }
-
+        System.out.println("ok json2");
         // 7. 传递处理后的消息给下一个出站处理器
         super.write(ctx, msg, promise);
     }

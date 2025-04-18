@@ -15,6 +15,7 @@ public class CorsOutboundHandler extends ChannelOutboundHandlerAdapter {
         if (msg instanceof FullHttpResponse) {
             FullHttpResponse response = (FullHttpResponse) msg;
             addCorsHeaders(response); // 添加 CORS 头
+            System.out.println("ok cors outbound");
         }
         // 其他类型消息（如 ByteBuf）直接传递
         super.write(ctx, msg, promise); // 必须调用父类方法传递消息
@@ -23,7 +24,7 @@ public class CorsOutboundHandler extends ChannelOutboundHandlerAdapter {
     // 统一设置 CORS 头
     private void addCorsHeaders(FullHttpResponse response) {
         // 允许的源（可根据请求动态设置）
-        String origin = "http://localhost:8081";
+        String origin = "http://localhost:8090";
 
         response.headers()
                 .set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, origin)
