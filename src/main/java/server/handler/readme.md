@@ -13,5 +13,6 @@
         ctx.writeAndFlush(Object);
 
 在获取post参数时这样写： Map<String, String> params = ctx.channel().attr(ParamsHandler.PARAM_KEY).get();
+如果是get请求，千万不能尝试获取post参数；
 在获取username时这样写：String username =  ctx.channel().attr(JwtAuthHandler.USERNAME).get();
 vue的前端端口必须是8090
