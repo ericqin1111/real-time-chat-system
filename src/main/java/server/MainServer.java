@@ -1,19 +1,15 @@
 package server;
 
 import config.MyBatisConfig;
-import entity.User;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
-import mapper.UserMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpServerCodec;
+import server.handler.general.*;
 
 public class MainServer {
 
@@ -49,15 +45,15 @@ public class MainServer {
                         protected void initChannel(SocketChannel ch) {//ch是客户端请求channel
                             ChannelPipeline pipeline = ch.pipeline();
 
-                            // 添加字符串编解码器
-                            pipeline.addLast(new StringDecoder());//字节变字符串
-                            pipeline.addLast(new StringEncoder());//出站，字符串变成字节
-
-                            // 这里添加入站处理器
-                            pipeline.addLast(new EchoServerHandler());
-
-
-                            //这里添加出站处理器，注意，出站处理器是逆序执行的.
+                            pipeline.addLast(new HttpServerCodec()) // HTTP 请求解码和响应编码
+                                    .addLast(new HttpObjectAggregator(65536))// 聚合 HTTP 请求为 FullHttpRequest
+                                    //入站处理器
+                                    .addLast(new CorsInboundHandler())//判断跨域
+                                    .addLast(new JwtAuthHandler())//判断是否需要jwt
+                                    .addLast(new ParamsHandler())//解析参数
+                                    .addLast(new RouterHandler())//正式进入处理
+                                    //出站处理器
+                                    .addLast(new CorsOutboundHandler());//出站加跨域头
                         }
                     })
                     //这里是服务器的一般配置
@@ -83,34 +79,18 @@ public class MainServer {
         }
     }
 
-    // 自定义业务处理器
-    private static class EchoServerHandler extends ChannelInboundHandlerAdapter {
-        @Override
-        public void channelRead(ChannelHandlerContext ctx, Object msg) {
-            // 接收客户端消息并回显
 
-            String message = (String) msg;
-            System.out.println("收到消息: " + message);
-            ctx.writeAndFlush("服务器回应: " + message + "\n");
-        }
-
-        @Override
-        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-            // 异常处理
-            cause.printStackTrace();
-            ctx.close();
-        }
-    }
 
     public static void main(String[] args) throws Exception {
         MyBatisConfig.init();
 
-        // 使用封装方法执行操作
-        MyBatisConfig.execute(UserMapper.class, mapper -> {
-            List<User> users = mapper.getAll();
-            System.out.println("查询结果: " + users);
-        });
-
+//        // 使用封装方法执行操作
+//        MyBatisConfig.execute(UserMapper.class, mapper -> {
+//            List<User> users = mapper.getAll();
+//            System.out.println("查询结果: " + users);
+//        });
+        int port = 8080;
+        new MainServer(port).run();
     }
 }
 
