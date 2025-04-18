@@ -8,6 +8,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
+import io.netty.util.AttributeKey;
 import io.netty.util.CharsetUtil;
 import server.handler.JwtAuthConfig;
 import server.handler.utils.JwtUtil;
@@ -15,12 +16,13 @@ import server.handler.utils.JwtUtil;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 public class JwtAuthHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     // 需要认证的 API 路径前缀
     private static final List<String> SECUREFREE_PATHS = JwtAuthConfig.getSECUREFREE_PATHS();
-
+    private static final AttributeKey<String> USERNAME = AttributeKey.valueOf("username");
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
@@ -34,6 +36,8 @@ public class JwtAuthHandler extends SimpleChannelInboundHandler<FullHttpRequest>
                 sendUnauthorizedResponse(ctx);
                 return; // 终止处理
             }
+            String username = JwtUtil.getUsername(token);
+            ctx.channel().attr(USERNAME).set(username);
         }
 
         // 3. 传递请求到下一个 Handler

@@ -23,7 +23,7 @@ public class CorsOutboundHandler extends ChannelOutboundHandlerAdapter {
     // 统一设置 CORS 头
     private void addCorsHeaders(FullHttpResponse response) {
         // 允许的源（可根据请求动态设置）
-        String origin = "http://localhost:8070";
+        String origin = "http://localhost:8081";
 
         response.headers()
                 .set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, origin)

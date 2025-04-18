@@ -8,6 +8,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.codec.http.HttpServerCodec;
 import server.handler.general.*;
 
@@ -45,15 +46,17 @@ public class MainServer {
                         protected void initChannel(SocketChannel ch) {//ch是客户端请求channel
                             ChannelPipeline pipeline = ch.pipeline();
 
-                            pipeline.addLast(new HttpServerCodec()) // HTTP 请求解码和响应编码
+                            pipeline //入站处理器
+                                    .addLast(new HttpServerCodec()) // HTTP 请求解码和响应编码
                                     .addLast(new HttpObjectAggregator(65536))// 聚合 HTTP 请求为 FullHttpRequest
-                                    //入站处理器
                                     .addLast(new CorsInboundHandler())//判断跨域
                                     .addLast(new JwtAuthHandler())//判断是否需要jwt
                                     .addLast(new ParamsHandler())//解析参数
                                     .addLast(new RouterHandler())//正式进入处理
                                     //出站处理器
-                                    .addLast(new CorsOutboundHandler());//出站加跨域头
+                                    .addLast(new CorsOutboundHandler())//出站加跨域头
+                                    .addLast(new JsonOutboundEncoder());//json化数据
+
                         }
                     })
                     //这里是服务器的一般配置
@@ -84,11 +87,7 @@ public class MainServer {
     public static void main(String[] args) throws Exception {
         MyBatisConfig.init();
 
-//        // 使用封装方法执行操作
-//        MyBatisConfig.execute(UserMapper.class, mapper -> {
-//            List<User> users = mapper.getAll();
-//            System.out.println("查询结果: " + users);
-//        });
+
         int port = 8080;
         new MainServer(port).run();
     }
