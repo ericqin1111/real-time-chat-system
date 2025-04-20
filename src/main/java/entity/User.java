@@ -23,4 +23,8 @@ public class User {
 
     @TableField("avatar_mime_type")
     private String avatarMimeType;
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
 }

@@ -1,5 +1,7 @@
 package client;
 
+import io.netty.channel.ChannelHandlerContext;
+import server.GlobalVar;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
@@ -9,11 +11,27 @@ import java.nio.charset.Charset;
 import java.util.Scanner;
 
 public class ChatClient {
+    private String username;
+    private ChannelHandlerContext ctx;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public ChannelHandlerContext getCtx() {
+        return ctx;
+    }
+
+    // 客户端构造方法，接收用户名和上下文
+    public ChatClient(String username, ChannelHandlerContext ctx) {
+        this.username = username;
+        this.ctx = ctx;
+    }
+
     //客户端启动方法
     public void startClient(String name) throws IOException {
         //连接服务端
         SocketChannel socketChannel=SocketChannel.open(new InetSocketAddress("127.0.0.1",8080));
-
         //接收服务端响应数据
         Selector selector=Selector.open();
         socketChannel.configureBlocking(false);
@@ -30,6 +48,11 @@ public class ChatClient {
             }
         }
     }
+    public static void createChatClient(ChannelHandlerContext ctx, String username) {
+        ChatClient client = new ChatClient(username, ctx);
+        GlobalVar.addClient(client); // 假设 GlobalVar 维护着在线客户端列表
+    }
+
 
     public static void main(String[] args){
 //        try {
