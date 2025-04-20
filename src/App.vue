@@ -1,26 +1,55 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div class="wechat-container">
+    <AppSidebar class="sidebar" @chat-selected="handleChatSelected" />
+    <ChatArea class="chat-area" :current-chat-id="currentChatId" />
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import AppSidebar from './components/AppSidebar.vue'
+import ChatArea from './components/ChatArea.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    AppSidebar,
+    ChatArea
+  },
+  data() {
+    return {
+      currentChatId: 1
+    }
+  },
+  methods: {
+    handleChatSelected(chatId) {
+      this.currentChatId = chatId
+    }
   }
 }
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.wechat-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+.sidebar {
+  width: 280px;
+  background-color: #f5f5f5;
+  border-right: 1px solid #e6e6e6;
+}
+
+.chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 </style>
