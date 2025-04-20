@@ -2,6 +2,7 @@ package mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import entity.User;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -15,5 +16,8 @@ public interface UserMapper extends BaseMapper<User> {
     List<User> getAll();
     @Select("select * from users WHERE USERNAME = #{username}")
     User findUserByUsername(@Param("username") String username);
-    void insertUser(User user);
+
+
+    @Insert("insert into users (username,password) values (#{username},#{password} )")
+    void insertUser(String username,String password);
 }

@@ -1,10 +1,11 @@
 package server.handler;
 
 import io.netty.channel.ChannelPipeline;
-import io.netty.handler.codec.http.HttpServerCodec;
 import lombok.Getter;
+import server.handler.auth.RegisterHandler;
 import server.handler.example.ExampleHandler;
 import server.handler.example.WSExampleHandler;
+import server.handler.auth.LoginHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +24,13 @@ public class RouterConfig {
         });
 
 
+        routeMap.put("/login",pipeline ->{
+            pipeline.addLast(new LoginHandler());
+        });
+
+        routeMap.put("/register",pipeline ->{
+            pipeline.addLast(new RegisterHandler());
+        });
 
 
         //这里写websocket的路由规则

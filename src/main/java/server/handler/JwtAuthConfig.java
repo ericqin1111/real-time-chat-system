@@ -14,5 +14,9 @@ public class JwtAuthConfig {
     static {
         SECUREFREE_PATHS.add("/example");
         SECUREFREE_PATHS.add("/wsexample");
+        SECUREFREE_PATHS.add("/login");
+        SECUREFREE_PATHS.add("/register");
+
+
     }
 }

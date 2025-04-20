@@ -22,6 +22,9 @@ public class ChatClient {
         return ctx;
     }
 
+    public ChatClient() {
+    }
+
     // 客户端构造方法，接收用户名和上下文
     public ChatClient(String username, ChannelHandlerContext ctx) {
         this.username = username;
@@ -55,11 +58,11 @@ public class ChatClient {
 
 
     public static void main(String[] args){
-//        try {
-//            new ChatClient().startClient();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            new ChatClient().startClient("131");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
         }

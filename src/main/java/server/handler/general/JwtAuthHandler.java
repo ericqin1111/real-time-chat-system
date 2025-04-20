@@ -12,7 +12,7 @@ import server.handler.utils.JwtUtil;
 
 import java.util.List;
 
-public class JwtAuthHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+public class  JwtAuthHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     // 需要认证的 API 路径前缀
     private static final List<String> SECUREFREE_PATHS = JwtAuthConfig.getSECUREFREE_PATHS();
