@@ -13,7 +13,15 @@
         ctx.writeAndFlush(Object);
 
 在获取参数时这样写： Map<String, String> params = ctx.channel().attr(GlobalVar.PARAM_KEY).get();
+
 如果是get请求，千万不能尝试获取post参数；
+
 在获取username时这样写：String username =  ctx.channel().attr(GlobalVar.USERNAME).get();
+
 vue的前端端口必须是8090
+
 连接数据库的配置在globalvar
+
+如果参数中有文件会自动储存到upload目录
+
+如果访问要文件就用http://localhost:8080/file/文件名的路径，文件名太复杂？没事因为通过api会返回给你文件名。
