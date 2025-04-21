@@ -14,9 +14,12 @@ public class CorsOutboundHandler extends ChannelOutboundHandlerAdapter {
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         if (msg instanceof FullHttpResponse) {
+
             FullHttpResponse response = (FullHttpResponse) msg;
+
             addCorsHeaders(response); // 添加 CORS 头
             System.out.println("ok cors outbound");
+            System.out.println(response.headers());
         }
         // 其他类型消息（如 ByteBuf）直接传递
         super.write(ctx, msg, promise); // 必须调用父类方法传递消息

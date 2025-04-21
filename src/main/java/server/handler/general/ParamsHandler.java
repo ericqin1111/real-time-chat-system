@@ -6,17 +6,26 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.multipart.Attribute;
+import io.netty.handler.codec.http.multipart.FileUpload;
+import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
+import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.netty.util.CharsetUtil;
 import server.GlobalVar;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class  ParamsHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     // 定义存储参数的 AttributeKey
     // AttributeKey 的作用是作为 唯一标识符，用于在 Channel 的上下文中存取数据。它本身不存储任何业务数据，只是用来标识一个存储位置。
-
 
     //使用方法如下
     //    Map<String, String> params = ctx.channel().attr(PostParamHandler.PARAM_KEY).get();
@@ -60,7 +69,66 @@ public class  ParamsHandler extends SimpleChannelInboundHandler<FullHttpRequest>
             } catch (IOException e) {
                 throw new RuntimeException("JSON 解析失败", e);
             }
+        }else {
+            // 初始化 multipart 解析器
+            HttpPostRequestDecoder decoder = new HttpPostRequestDecoder(request);
+            if (decoder.isMultipart()) {
+                try {
+                    // 遍历所有请求体部分
+                    for (InterfaceHttpData data : decoder.getBodyHttpDatas()) {
+                        if (data.getHttpDataType() == InterfaceHttpData.HttpDataType.FileUpload) {
+
+
+                            // 处理文件上传
+                            handleFileUpload((FileUpload) data, params);
+                        } else if (data.getHttpDataType() == InterfaceHttpData.HttpDataType.Attribute) {
+                                // 处理普通参数
+                            handleAttribute((Attribute) data, params);
+                        }
+                        data.release();
+                    }
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
+                }
+
         }
         return params;
+    }
+
+    // 处理文件上传
+    private void handleFileUpload(FileUpload fileUpload, Map<String,String> params) throws IOException {
+        if (fileUpload.isCompleted()) {
+            System.out.println(fileUpload.getName());
+            // 生成唯一文件名
+            String originalName = fileUpload.getFilename();
+            String uniqueName = generateUniqueFileName(originalName);
+            params.put(fileUpload.getName(), uniqueName);
+
+
+            // 保存文件到本地
+            Path uploadPath = Paths.get(GlobalVar.UPLOAD_DIR, uniqueName);
+            Files.createDirectories(uploadPath.getParent());
+            fileUpload.renameTo(uploadPath.toFile());
+        }
+    }
+    // 处理普通参数
+    private void handleAttribute(Attribute attribute, Map<String, String> params) throws IOException {
+        params.put(attribute.getName(), attribute.getValue());
+    }
+
+    // 生成唯一文件名（时间戳+随机数+原始文件名哈希）
+    private String generateUniqueFileName(String originalName) {
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String random = String.valueOf(ThreadLocalRandom.current().nextInt(1000, 9999));
+        String hash = Integer.toHexString(originalName.hashCode());
+        return timestamp + "_" + random + "_" + hash + getFileExtension(originalName);
+    }
+
+    // 获取文件扩展名
+    private String getFileExtension(String filename) {
+        int dotIndex = filename.lastIndexOf('.');
+        return (dotIndex == -1) ? "" : filename.substring(dotIndex);
     }
 }

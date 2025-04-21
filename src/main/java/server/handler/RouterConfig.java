@@ -1,11 +1,13 @@
 package server.handler;
 
 import io.netty.channel.ChannelPipeline;
+import io.netty.handler.stream.ChunkedWriteHandler;
 import lombok.Getter;
 import server.handler.auth.RegisterHandler;
 import server.handler.example.ExampleHandler;
 import server.handler.example.WSExampleHandler;
 import server.handler.auth.LoginHandler;
+import server.handler.file.FileHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +32,11 @@ public class RouterConfig {
 
         routeMap.put("/register",pipeline ->{
             pipeline.addLast(new RegisterHandler());
+        });
+
+        routeMap.put("/file", pipeline ->{
+            pipeline.addLast(new ChunkedWriteHandler());
+            pipeline.addLast(new FileHandler());
         });
 
 

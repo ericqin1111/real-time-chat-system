@@ -48,7 +48,7 @@ public class MainServer {
 
                             pipeline
                                     .addLast("httpServerCodec",new HttpServerCodec()) // HTTP 请求解码和响应编码
-                                    .addLast("httpObjectAggregator", new HttpObjectAggregator(65536))// 聚合 HTTP 请求为 FullHttpRequest
+                                    .addLast("httpObjectAggregator", new HttpObjectAggregator(10 * 1024 * 1024))// 聚合 HTTP 请求为 FullHttpRequest
                                     // 入站处理器
                                     .addLast("corsInboundHandler", new CorsInboundHandler())//判断跨域
                                     .addLast("jwtAuthHandler", new JwtAuthHandler())//判断是否需要jwt
