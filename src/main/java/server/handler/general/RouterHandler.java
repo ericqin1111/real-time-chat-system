@@ -5,6 +5,7 @@ import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolConfig;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
 import server.GlobalVar;
@@ -14,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class RouterHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
@@ -51,6 +53,8 @@ public class RouterHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
                 // 5. 触发协议升级，需保留请求对象
 
                 ctx.fireChannelRead(request.retain());
+
+
             } else {
                 sendError(ctx,  HttpResponseStatus.NOT_FOUND);
             }
@@ -110,6 +114,14 @@ public class RouterHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
                 .build();
 
         ctx.pipeline().addLast(new WebSocketServerProtocolHandler(config));
+        // 添加空闲状态处理器（核心心跳检测组件）
+        ctx.pipeline().addLast(new IdleStateHandler(
+                60, 0, 0, TimeUnit.SECONDS));
+
+        ctx.pipeline().addLast(new WSUnifiedEncoder());
+
+
+        ctx.pipeline().addLast(new HeartbeatHandler(3));
 
 
         // 根据路径添加对应的 WebSocket 处理器
@@ -117,7 +129,12 @@ public class RouterHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
         handlerChainBuilder.accept(ctx.pipeline());
 
         ctx.pipeline().fireUserEventTriggered(WebSocketServerProtocolHandler.HandshakeComplete.class);
-        System.out.println("当前 Pipeline 处理器链: " + ctx.pipeline().names());
+
+
+
+
+
+
     }
 
     // 路径匹配（支持前缀匹配）

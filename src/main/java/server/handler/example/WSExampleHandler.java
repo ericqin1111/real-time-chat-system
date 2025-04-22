@@ -9,20 +9,23 @@ import io.netty.util.AttributeKey;
 import server.GlobalVar;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
 
-public class WSExampleHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
+public class WSExampleHandler extends SimpleChannelInboundHandler<Object> {
 
 
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) {
-        System.out.println(msg.text());
-        Map<String, String> map = ctx.channel().attr(GlobalVar.PARAM_KEY).get();
-        System.out.println(map.get("user"));
-        ctx.writeAndFlush(new TextWebSocketFrame(msg.text()));
+    protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
+
+        Map<String, String> content = ctx.channel().attr(GlobalVar.DATA_CONTEXT).get();
+        System.out.println(content.get("data"));
+        Map<String, Integer> www  = new HashMap<>();
+        www.put("what", 99);
+        ctx.writeAndFlush(www);
     }
 
 

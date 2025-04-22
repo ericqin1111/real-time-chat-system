@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GlobalVar {
     private static Map<String, ChatClient> clientMap = new ConcurrentHashMap<>();
 
+    //http请求参数
     public static final AttributeKey<Map<String, String>> PARAM_KEY =
             AttributeKey.valueOf("Params");
     public static final AttributeKey<String> USERNAME = AttributeKey.valueOf("username");
@@ -18,6 +19,9 @@ public class GlobalVar {
     public static final int SERVER_PORT = 8080;
     public static final String ALLOWED_PORT = "8090";
     public static final String UPLOAD_DIR = "upload/";
+    //websocketframe数据
+    public static final AttributeKey<Map<String, String>> DATA_CONTEXT =
+            AttributeKey.valueOf("dataContext");
 
     public static void addClient(ChatClient client) {
         clientMap.put(client.getUsername(), client);
