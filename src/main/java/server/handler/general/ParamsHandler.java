@@ -38,7 +38,7 @@ public class  ParamsHandler extends SimpleChannelInboundHandler<FullHttpRequest>
         }
 
         // 2. 解析参数（支持表单和 JSON）
-        Map<String, String> params = parseParams(request);
+        Map<String, String> params = parseParams(ctx ,request);
 
         // 3. 将参数存入 ctx 的 Attribute
         ctx.channel().attr(GlobalVar.PARAM_KEY).set(params);
@@ -47,7 +47,7 @@ public class  ParamsHandler extends SimpleChannelInboundHandler<FullHttpRequest>
         ctx.fireChannelRead(request.retain());
     }
 
-    private Map<String, String> parseParams(FullHttpRequest request) {
+    private Map<String, String> parseParams(ChannelHandlerContext ctx , FullHttpRequest request) {
         Map<String, String> params = new HashMap<>();
         ByteBuf content = request.content();
 
@@ -80,7 +80,7 @@ public class  ParamsHandler extends SimpleChannelInboundHandler<FullHttpRequest>
 
 
                             // 处理文件上传
-                            handleFileUpload((FileUpload) data, params);
+                            handleFileUpload( ctx ,(FileUpload) data, params);
                         } else if (data.getHttpDataType() == InterfaceHttpData.HttpDataType.Attribute) {
                                 // 处理普通参数
                             handleAttribute((Attribute) data, params);
@@ -98,19 +98,26 @@ public class  ParamsHandler extends SimpleChannelInboundHandler<FullHttpRequest>
     }
 
     // 处理文件上传
-    private void handleFileUpload(FileUpload fileUpload, Map<String,String> params) throws IOException {
+    private void handleFileUpload(ChannelHandlerContext ctx, FileUpload fileUpload, Map<String,String> params) throws IOException {
         if (fileUpload.isCompleted()) {
             System.out.println(fileUpload.getName());
             // 生成唯一文件名
             String originalName = fileUpload.getFilename();
             String uniqueName = generateUniqueFileName(originalName);
-            params.put(fileUpload.getName(), uniqueName);
+            params.put("fileName", uniqueName);
 
+            //使用线程池来本地化文件，不过如果本地化失败没有进行反馈，待完善。
+            GlobalVar.businessExecutor.execute(() ->{
+                try {
+                // 保存文件到本地
+                Path uploadPath = Paths.get(GlobalVar.UPLOAD_DIR, uniqueName);
+                Files.createDirectories(uploadPath.getParent());
+                fileUpload.renameTo(uploadPath.toFile());
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            });
 
-            // 保存文件到本地
-            Path uploadPath = Paths.get(GlobalVar.UPLOAD_DIR, uniqueName);
-            Files.createDirectories(uploadPath.getParent());
-            fileUpload.renameTo(uploadPath.toFile());
         }
     }
     // 处理普通参数

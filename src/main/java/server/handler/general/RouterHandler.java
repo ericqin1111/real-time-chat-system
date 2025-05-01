@@ -7,13 +7,11 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolConfig;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.CharsetUtil;
-import io.netty.util.ReferenceCountUtil;
 import server.GlobalVar;
 import server.handler.RouterConfig;
+import server.handler.utils.JwtUtil;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -42,8 +40,9 @@ public class RouterHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
 
         //判断是否为 WebSocket 升级请求
         if (isWebSocketUpgradeRequest(request)) {
-            Map<String, String> params = parseGetParameters(request);
-            ctx.channel().attr(GlobalVar.PARAM_KEY).set(params);
+            String userid = parseGetParameters(request);
+
+            ctx.channel().attr(GlobalVar.USERID).set(userid);
             // 3. 获取对应的处理器链配置
             Consumer<ChannelPipeline> handlerChainBuilder = routeMap.get(uri);
             if (handlerChainBuilder != null) {
@@ -51,7 +50,7 @@ public class RouterHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
                 configureWebSocketPipeline(ctx, uri, handlerChainBuilder);
                 // 5. 触发协议升级
                 // 5. 触发协议升级，需保留请求对象
-
+                GlobalVar.addUserChannel(uri, ctx.channel());
                 ctx.fireChannelRead(request.retain());
 
 
@@ -121,7 +120,7 @@ public class RouterHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
         ctx.pipeline().addLast(new WSUnifiedEncoder());
 
 
-        ctx.pipeline().addLast(new HeartbeatHandler(3));
+        ctx.pipeline().addLast(new HeartbeatAndFrameHandler(3));
 
 
         // 根据路径添加对应的 WebSocket 处理器
@@ -153,20 +152,17 @@ public class RouterHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
     }
 
     // 解析 GET 请求参数为 Map<String, String>
-    private Map<String, String> parseGetParameters(FullHttpRequest request) {
+    private String parseGetParameters(FullHttpRequest request) {
         QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
         Map<String, List<String>> rawParams = decoder.parameters();
 
-        // 转换为 Map<String, String>（若有多个值，取第一个）
-        Map<String, String> params = new HashMap<>();
-        for (Map.Entry<String, List<String>> entry : rawParams.entrySet()) {
-            String key = entry.getKey();
-            List<String> values = entry.getValue();
-            if (!values.isEmpty()) {
-                params.put(key, values.get(0)); // 取第一个值
-            }
+        // 5. 使用参数
+        String token = null;
+        if (rawParams.containsKey("token")) {
+            token = rawParams.get("token").get(0); // GET参数a的第一个值
         }
-        return Collections.unmodifiableMap(params); // 返回不可修改的 Map
+        String userid = JwtUtil.getUsername(token);
+        return userid; // 返回不可修改的 Map
     }
 
     // 发送错误响应

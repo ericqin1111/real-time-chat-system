@@ -35,7 +35,8 @@ public class LoginHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
                 return;
             }
             else {
-                String token= JwtUtil.createToken(username);
+                Integer userId = user.getUserId();
+                String token= JwtUtil.createToken(Integer.toString(userId));
                 sendSuccessResponse(ctx,token);
             }
 

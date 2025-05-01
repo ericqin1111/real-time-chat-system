@@ -13,7 +13,9 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.ReferenceCountUtil;
 
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class WSUnifiedEncoder extends MessageToMessageEncoder<Object> {
 
@@ -21,6 +23,19 @@ public class WSUnifiedEncoder extends MessageToMessageEncoder<Object> {
     private static final ByteBuf BUSINESS_HEADER = Unpooled.unreleasableBuffer(
             Unpooled.wrappedBuffer(new byte[]{0x00}).asReadOnly() // 业务类型标识
     );
+    private static final ByteBuf FRIMESS_HEADER = Unpooled.unreleasableBuffer(
+            Unpooled.wrappedBuffer(new byte[]{0x02}).asReadOnly() // 业务类型标识
+    );
+    private static final ByteBuf GROUPMESS_HEADER = Unpooled.unreleasableBuffer(
+            Unpooled.wrappedBuffer(new byte[]{0x03}).asReadOnly()
+    );
+    private static final ByteBuf FRIFILE_HEADER = Unpooled.unreleasableBuffer(
+            Unpooled.wrappedBuffer(new byte[]{0x04}).asReadOnly()
+    );
+    private static final ByteBuf GROUPFILE_HEADER = Unpooled.unreleasableBuffer(
+            Unpooled.wrappedBuffer(new byte[]{0x05}).asReadOnly()
+    );
+
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -29,15 +44,44 @@ public class WSUnifiedEncoder extends MessageToMessageEncoder<Object> {
 
         System.out.println(msg.getClass().getName());
         if (! (msg instanceof DefaultFullHttpResponse) && ! (msg instanceof BinaryWebSocketFrame)) {
+                Map<String, String> map = (Map<String, String>) msg;
+                String type = map.get("type");
                 byte[] bytes = serializeBusinessObject(msg);
-                ByteBuf buf = Unpooled.wrappedBuffer(
-                        BUSINESS_HEADER.duplicate(),
-                        Unpooled.wrappedBuffer(bytes)
-                );
-                out.add(new BinaryWebSocketFrame(buf));
+                ByteBuf buf = null;
+                if (type.equals("2")){
+                     buf = Unpooled.wrappedBuffer(
+                            FRIMESS_HEADER.duplicate(),
+                            Unpooled.wrappedBuffer(bytes)
+                    );
+                }else if (type.equals("3")){
+                     buf = Unpooled.wrappedBuffer(
+                            GROUPMESS_HEADER.duplicate(),
+                            Unpooled.wrappedBuffer(bytes)
+                    );
+                }else if (type.equals("4")){
+                    buf = Unpooled.wrappedBuffer(
+                            FRIFILE_HEADER.duplicate(),
+                            Unpooled.wrappedBuffer(bytes)
+                    );
+                }else if (type.equals("5")){
+                     buf = Unpooled.wrappedBuffer(
+                            GROUPFILE_HEADER.duplicate(),
+                            Unpooled.wrappedBuffer(bytes)
+                    );
+                }else if (type.equals("0")){
+                   buf = Unpooled.wrappedBuffer(
+                            BUSINESS_HEADER.duplicate(),
+                            Unpooled.wrappedBuffer(bytes)
+                    );
+                }
+
+
+                out.add(ReferenceCountUtil.retain(new BinaryWebSocketFrame(buf)));
         }else {
+
             out.add(ReferenceCountUtil.retain(msg));
         }
+        System.out.println("OKKKKK");
 
     }
 

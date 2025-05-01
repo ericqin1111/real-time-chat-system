@@ -20,6 +20,9 @@ public class GroupMessage {
     @TableField("content")
     private String content;
 
+    @TableField("content_type")
+    private Integer contentType;
+
     @TableField(value = "sent_time", fill = FieldFill.INSERT)
     private LocalDateTime sentTime;
 }

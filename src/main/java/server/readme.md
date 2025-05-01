@@ -18,7 +18,9 @@
 
 如果是get请求，千万不能尝试获取post参数；
 
-在获取username时这样写：String username =  ctx.channel().attr(GlobalVar.USERNAME).get();
+由于数据库操作全部基于userid,所以改用userid而非username
+在获取userid时这样写: String userid =  ctx.channel().attr(GlobalVar.USERID).get();
+但是userid在数据库存储时为int类型，所以你需要Integer.parseInt(userid)变化一次后再存储到数据库或查询
 
 vue的前端端口必须是8090
 
@@ -26,7 +28,9 @@ vue的前端端口必须是8090
 
 如果post参数中有文件会自动储存到upload目录
 
-如果访问要文件就用http://localhost:8080/file/文件名的路径，文件名太复杂？没事因为通过api会返回给你文件名。
+如果访问要文件就用http://localhost:8080/file/文件名的路径，文件名太复杂？没事,因为通过api会返回给你文件名。
+
+前端的传输数据必须带一个meta，具体格式是{'target': 传输的对象的id，为字符串， 'content': 文件名或者文字消息，为字符串}
 
 线程池使用方法：
 对于费时的业务逻辑，比如写入、更新数据库、复杂的查询和文件的传输，最好都使用线程池.只需要把原来的方法封装到Runnable对象中，

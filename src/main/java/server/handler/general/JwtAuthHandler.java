@@ -31,7 +31,7 @@ public class  JwtAuthHandler extends SimpleChannelInboundHandler<FullHttpRequest
                 return; // 终止处理
             }
             String username = JwtUtil.getUsername(token);
-            ctx.channel().attr(GlobalVar.USERNAME).set(username);
+            ctx.channel().attr(GlobalVar.USERID).set(username);
         }
 
         // 3. 传递请求到下一个 Handler

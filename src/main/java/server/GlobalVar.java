@@ -1,12 +1,15 @@
 package server;
 
 import client.ChatClient;
+import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 
 import java.util.Map;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import server.handler.utils.UserChannelInfo;
 
 
 public class GlobalVar {
@@ -15,17 +18,29 @@ public class GlobalVar {
     //http请求参数
     public static final AttributeKey<Map<String, String>> PARAM_KEY =
             AttributeKey.valueOf("Params");
-    public static final AttributeKey<String> USERNAME = AttributeKey.valueOf("username");
+    public static final AttributeKey<String> USERID = AttributeKey.valueOf("userid");
     public static final String JDBC="jdbc:mysql://localhost:3306/chat_system";
     public static final String USER = "root";
-    public static final String PASS = "12345";
+    public static final String PASS = "123456";
     public static final int SERVER_PORT = 8080;
     public static final String ALLOWED_PORT = "8090";
     public static final String UPLOAD_DIR = "upload/";
     //websocketframe数据
+    public static final AttributeKey<Map<String, String>> DATA_CONTEXT =
+            AttributeKey.valueOf("dataContext");
+    //全局用户websockerchannel
+    private static final ConcurrentHashMap<String, UserChannelInfo> userChannelMap = new ConcurrentHashMap<>();
 
     public static final ExecutorService businessExecutor = createBusinessExecutor();
     private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
+
+
+
+
+
+
+
+
 
     private static ExecutorService createBusinessExecutor() {
         // 使用 Guava 的 ThreadFactoryBuilder 给线程命名，方便调试
@@ -89,8 +104,7 @@ public class GlobalVar {
     }
 
 
-    public static final AttributeKey<Map<String, String>> DATA_CONTEXT =
-            AttributeKey.valueOf("dataContext");
+
 
     public static void addClient(ChatClient client) {
         clientMap.put(client.getUsername(), client);
@@ -104,5 +118,32 @@ public class GlobalVar {
     // 清理客户端
     public static void removeClient(String username) {
         clientMap.remove(username);
+    }
+
+
+    // 添加
+    public static void addUserChannel(String userId, Channel channel) {
+        userChannelMap.put(userId, new UserChannelInfo(channel));
+    }
+
+    // 移除
+    public static void removeUserChannel(String userId) {
+        userChannelMap.remove(userId);
+    }
+
+    public static void sendMessageToUser(String userId, Object msg) {
+        UserChannelInfo info = userChannelMap.get(userId);
+        if (info != null) {
+            ReentrantLock lock = info.getLock();
+            lock.lock();
+            try {
+                Channel channel = info.getChannel();
+                if (channel.isActive()) {
+                    channel.writeAndFlush(msg);
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
     }
 }

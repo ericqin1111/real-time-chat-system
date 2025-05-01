@@ -9,6 +9,7 @@ import server.handler.example.ThreadPoolTestHandler;
 import server.handler.example.WSExampleHandler;
 import server.handler.auth.LoginHandler;
 import server.handler.file.FileHandler;
+import server.handler.websocket.WebsocketHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,6 +51,10 @@ public class RouterConfig {
         //这里写websocket的路由规则
         routeMap.put("/wsexample", pipeline -> {
             pipeline.addLast(new WSExampleHandler());
+        });
+
+        routeMap.put("/websocket", pipeline -> {
+            pipeline.addLast(new WebsocketHandler());
         });
     }
 
