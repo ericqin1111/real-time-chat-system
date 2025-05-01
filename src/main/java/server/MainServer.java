@@ -10,6 +10,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.codec.http.HttpServerCodec;
+import server.handler.example.ThreadPoolTestHandler;
 import server.handler.general.*;
 
 public class MainServer {
@@ -51,12 +52,13 @@ public class MainServer {
                                     .addLast("httpObjectAggregator", new HttpObjectAggregator(10 * 1024 * 1024))// 聚合 HTTP 请求为 FullHttpRequest
                                     // 入站处理器
                                     .addLast("corsInboundHandler", new CorsInboundHandler())//判断跨域
-                                    .addLast("jwtAuthHandler", new JwtAuthHandler())//判断是否需要jwt
+//                                    .addLast("jwtAuthHandler", new JwtAuthHandler())//判断是否需要jwt
                                     .addLast("paramsHandler", new ParamsHandler())//解析参数
                                     .addLast("routerHandler", new RouterHandler())//正式进入处理
                                     //出站处理器
                                     .addLast("corsOutboundHandler", new CorsOutboundHandler())//出站加跨域头
                                     .addLast("jsonOutboundEncoder", new JsonOutboundEncoder());//json化数据
+
 
                         }
                     })

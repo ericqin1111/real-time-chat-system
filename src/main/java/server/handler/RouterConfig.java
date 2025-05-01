@@ -5,6 +5,7 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 import lombok.Getter;
 import server.handler.auth.RegisterHandler;
 import server.handler.example.ExampleHandler;
+import server.handler.example.ThreadPoolTestHandler;
 import server.handler.example.WSExampleHandler;
 import server.handler.auth.LoginHandler;
 import server.handler.file.FileHandler;
@@ -24,6 +25,12 @@ public class RouterConfig {
         routeMap.put("/example", pipeline -> {
             pipeline.addLast(new ExampleHandler());
         });
+
+        routeMap.put("/test/pool", pipeline -> {
+            // 这个路径不需要复杂的 Handler 链，直接添加测试 Handler
+            pipeline.addLast(new ThreadPoolTestHandler());
+        });
+
 
 
         routeMap.put("/login",pipeline ->{

@@ -47,6 +47,8 @@ public class ClientThread implements Runnable{
         }
 
     }
+
+
     //处理可读状态操作
     private void readOperator(Selector selector, SelectionKey selectionKey) throws IOException {
         //1.从SelectionKey获取到已经就绪的通道

@@ -28,3 +28,28 @@ vue的前端端口必须是8090
 
 如果访问要文件就用http://localhost:8080/file/文件名的路径，文件名太复杂？没事因为通过api会返回给你文件名。
 
+线程池使用方法：
+对于费时的业务逻辑，比如写入、更新数据库、复杂的查询和文件的传输，最好都使用线程池.只需要把原来的方法封装到Runnable对象中，
+然后交给线程池处理
+如果不清楚，可以参考GenericBusinessHandler这个模板
+
+使用方法：
+protected void channelRead0(ChannelHandlerContext ctx, T request) throws Exception {
+    Runnable businessLogicTask = () -> { 业务逻辑 }  业务逻辑封装到任务内
+
+    GlobalVar.businessExecutor.execute(timeConsumingTask);  把任务交给线程池
+
+    ctx.channel().eventLoop().execute(() -> {   把响应调度交还给eventloop处理
+        final String responseThreadName = Thread.currentThread().getName();
+        System.out.println("[" + responseThreadName + "] 准备发送响应...");
+        if (ctx.channel().isActive()) {
+        // 发送响应，可以根据需要添加 Listener
+            ctx.writeAndFlush(response)/*.addListener(ChannelFutureListener.CLOSE_ON_FAILURE)*/;
+            System.out.println("[" + responseThreadName + "] 响应已发送。");
+        } 
+        else {
+            System.out.println("[" + responseThreadName + "] Channel 不再活跃，响应未发送。");
+        }
+    });
+
+}
