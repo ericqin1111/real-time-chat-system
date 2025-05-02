@@ -21,10 +21,13 @@
         ctx.writeAndFlush(Object);
 
 在获取http参数时这样写： Map<String, String> params = ctx.channel().attr(GlobalVar.PARAM_KEY).get();
+而且即使是文件，解析参数的handler也会自动帮你放入本地，然后把文件名放在params,
+所以说你不需要自己再读一遍文件！！！！！
 
 在获取websocket内容时这样写： Map<String, String> content = ctx.channel().attr(GlobalVar.DATA_CONTEXT).get();
+同样，文件的读取本地化也是自动进行并返还给你文件名，不用自己读文件
 
-如果是get请求，千万不能尝试获取post参数；
+如果请求是get就不要带参数
 
 由于数据库操作全部基于userid,所以改用userid而非username
 在获取userid时这样写: String userid =  ctx.channel().attr(GlobalVar.USERID).get();
