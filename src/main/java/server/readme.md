@@ -42,6 +42,19 @@ vue的前端端口必须是8090
 
 数据库储存的date为localDatetime， 可以这样转换并使用：groupMessage.setSentTime(GlobalVar.toLocalDateTime(new Date()));
 
+
+
+
+
+
+如果想要知道正在连接的channel集合，访问GlobalVar.userChannelMap，通过遍历好友的键看有无存在你就能知道在线人数
+
+
+
+
+
+
+
 线程池使用方法：
 对于费时的业务逻辑，比如写入、更新数据库、复杂的查询和文件的传输，最好都使用线程池.只需要把原来的方法封装到Runnable对象中，
 然后交给线程池处理
