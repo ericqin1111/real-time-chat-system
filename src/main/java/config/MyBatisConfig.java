@@ -13,6 +13,9 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import server.GlobalVar;
+// 正确！
+import com.baomidou.mybatisplus.core.MybatisConfiguration;
+
 
 import java.util.function.Consumer;
 
@@ -37,12 +40,12 @@ public class MyBatisConfig {
             Environment environment = new Environment("development", transactionFactory, dataSource);
 
             // 3. 创建 MyBatis 配置并绑定环境
-            Configuration mybatisConfig = new Configuration(environment);
+            MybatisConfiguration mybatisConfig = new MybatisConfiguration(environment);
             mybatisConfig.setMapUnderscoreToCamelCase(true); // 启用驼峰命名映射
             mybatisConfig.addMappers("mapper"); // 确保包路径正确（如 mapper 是包名）
 
             // 4. 构建 SqlSessionFactory
-            sqlSessionFactory = new SqlSessionFactoryBuilder().build(mybatisConfig);
+            sqlSessionFactory = new MybatisSqlSessionFactoryBuilder().build(mybatisConfig);
         } catch (Exception e) {
             throw new RuntimeException("MyBatis 初始化失败", e);
         }
@@ -53,6 +56,13 @@ public class MyBatisConfig {
             T mapper = session.getMapper(mapperClass);
             action.accept(mapper);
             session.commit(); // 可选：提交事务
+        }
+    }
+
+    public static void execute(Consumer<SqlSession> action) {
+        try (SqlSession session = sqlSessionFactory.openSession()) {
+            action.accept(session);
+            session.commit();
         }
     }
 }

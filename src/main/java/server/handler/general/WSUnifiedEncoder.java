@@ -11,6 +11,7 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.ReferenceCountUtil;
+import server.GlobalVar;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -42,28 +43,33 @@ public class WSUnifiedEncoder extends MessageToMessageEncoder<Object> {
     @Override
     protected void encode(ChannelHandlerContext ctx, Object msg, List<Object> out) {
 
-        System.out.println(msg.getClass().getName());
         if (! (msg instanceof DefaultFullHttpResponse) && ! (msg instanceof BinaryWebSocketFrame)) {
                 Map<String, String> map = (Map<String, String>) msg;
                 String type = map.get("type");
+                System.out.println("contentype in wsunifiedencoder:" +  type);
                 byte[] bytes = serializeBusinessObject(msg);
                 ByteBuf buf = null;
                 if (type.equals("2")){
+
+                    System.out.println("in user message");
                      buf = Unpooled.wrappedBuffer(
                             FRIMESS_HEADER.duplicate(),
                             Unpooled.wrappedBuffer(bytes)
                     );
                 }else if (type.equals("3")){
+                    System.out.println("in group message");
                      buf = Unpooled.wrappedBuffer(
                             GROUPMESS_HEADER.duplicate(),
                             Unpooled.wrappedBuffer(bytes)
                     );
                 }else if (type.equals("4")){
+                    System.out.println("in friend file");
                     buf = Unpooled.wrappedBuffer(
                             FRIFILE_HEADER.duplicate(),
                             Unpooled.wrappedBuffer(bytes)
                     );
                 }else if (type.equals("5")){
+                    System.out.println("in group file");
                      buf = Unpooled.wrappedBuffer(
                             GROUPFILE_HEADER.duplicate(),
                             Unpooled.wrappedBuffer(bytes)

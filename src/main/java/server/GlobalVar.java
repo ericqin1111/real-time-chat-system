@@ -4,6 +4,9 @@ import client.ChatClient;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
@@ -36,7 +39,9 @@ public class GlobalVar {
 
 
 
-
+    public static LocalDateTime toLocalDateTime(Date date) {
+        return date == null ? null : date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+    }
 
 
 
@@ -133,13 +138,22 @@ public class GlobalVar {
 
     public static void sendMessageToUser(String userId, Object msg) {
         UserChannelInfo info = userChannelMap.get(userId);
+        System.out.println("send to:" + userId);
         if (info != null) {
             ReentrantLock lock = info.getLock();
             lock.lock();
             try {
                 Channel channel = info.getChannel();
                 if (channel.isActive()) {
-                    channel.writeAndFlush(msg);
+                    System.out.println("come to send message to user");
+                    channel.writeAndFlush(msg).addListener(future -> {
+                        if (!future.isSuccess()) {
+                            System.err.println("Failed to send message to user " + userId + ": " + future.cause());
+                            // 这里可以考虑移除 userChannelMap（说明通道已不可用）
+                        } else {
+                            System.out.println("Message sent to user " + userId);
+                        }
+                    });
                 }
             } finally {
                 lock.unlock();

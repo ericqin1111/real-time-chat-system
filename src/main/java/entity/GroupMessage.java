@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @TableName("group_messages")
 public class GroupMessage {
     @TableField("message_id")
-    private Long messageId;
+    private Integer messageId;
 
     @TableField("group_id")
     private Integer groupId;
@@ -20,9 +20,10 @@ public class GroupMessage {
     @TableField("content")
     private String content;
 
-    @TableField("content_type")
-    private Integer contentType;
 
     @TableField(value = "sent_time", fill = FieldFill.INSERT)
     private LocalDateTime sentTime;
+
+    @TableField("content_type")
+    private Integer contentType;
 }

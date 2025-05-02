@@ -1,29 +1,35 @@
 package server.handler.websocket;
 
 import config.MyBatisConfig;
+import entity.FriendMessage;
+import entity.GroupMessage;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import mapper.GroupMemberMapper;
-import mapper.GroupMessageStatMapper;
+import mapper.*;
 import server.GlobalVar;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 
 public class WebsocketHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
-
         Map<String, String> content = ctx.channel().attr(GlobalVar.DATA_CONTEXT).get();
-        if (content.get("type").equals("2")) {
+
+        String type = content.get("type");
+        System.out.println("contentType:" + type);
+        if (type.equals("2")) {
+            System.out.println("handleFriendmessage");
             handlerFriend(content, ctx);
-        }else if (content.get("type").equals("3")) {
+        }else if (type.equals("3")) {
+            System.out.println("handleGroupmessage");
             handlerGroup(content, ctx);
         }
-        else if (content.get("type").equals("4")) {
+        else if (type.equals("4")) {
+            System.out.println("handleFriendFile");
             handlerFriendFile(content, ctx);
-        }else if (content.get("type").equals("5")) {
+        }else if (type.equals("5")) {
+            System.out.println("handleGroupFile");
             handlerGroupFile(content, ctx);
         }
     }
@@ -31,39 +37,100 @@ public class WebsocketHandler extends SimpleChannelInboundHandler<Object> {
     private void handlerFriend(Map<String, String> content, ChannelHandlerContext ctx) {
         String target = content.get("target");
         String userid =  ctx.channel().attr(GlobalVar.USERID).get();
-        String type = content.get("type");
+        System.out.println("userID: " + userid);
         String message = content.get("content");
+        content.put("from", userid);
 
 
         GlobalVar.businessExecutor.execute(() ->{
 
+
+
+            MyBatisConfig.execute(sqlSession -> {
+                FriendMessageMapper friendMessageMapper = sqlSession.getMapper(FriendMessageMapper.class);
+                FriendMessageStatMapper friendMessageStatMapper = sqlSession.getMapper(FriendMessageStatMapper.class);
+
+                System.out.println("Mappers start");
+                int mess_id = friendMessageStatMapper.getTotal(Integer.parseInt(userid), Integer.parseInt(target));
+                friendMessageStatMapper.updateTotalCount(Integer.parseInt(userid), Integer.parseInt(target));
+                System.out.println("friendMapper Ok");
+
+                content.put("messId", Integer.toString(mess_id));
+
+                FriendMessage friendMessage = new FriendMessage();
+
+                friendMessage.setMessageId(mess_id);
+                friendMessage.setSenderId(Integer.parseInt(userid));
+                friendMessage.setReceiverId(Integer.parseInt(target));
+                friendMessage.setContent(message);
+                LocalDateTime now = GlobalVar.toLocalDateTime(new Date());
+                content.put("time", now.toString());
+                friendMessage.setSentTime(now);
+                //1表示文字消息
+                friendMessage.setContentType(1);
+
+
+                System.out.println("ready to insert friendMessage");
+                friendMessageMapper.insert(friendMessage);
+
+                System.out.println("insert friendMessage ok");
+            });
+            System.out.println("readyToSend");
+            GlobalVar.sendMessageToUser(target, content);
+
         });
 
-        content.put("from", userid);
-        GlobalVar.sendMessageToUser(target, content);
+
 
     }
 
     private void handlerGroup(Map<String, String> content, ChannelHandlerContext ctx) {
         String target = content.get("target");
         String userid =  ctx.channel().attr(GlobalVar.USERID).get();
-        String type = content.get("type");
+        System.out.println("userID: " + userid);
         String message = content.get("content");
         content.put("from", userid);
 
+        List<Integer> userIdList = new ArrayList<>();
         GlobalVar.businessExecutor.execute(() ->{
 
-            MyBatisConfig.execute(GroupMessageStatMapper.class, mapper ->{
-                mapper.updateTotalMessages(Integer.parseInt(target));
+
+
+            MyBatisConfig.execute(sqlSession -> {
+                GroupMessageStatMapper groupMessageStatMapper = sqlSession.getMapper(GroupMessageStatMapper.class);
+                GroupMemberMapper groupMemberMapper = sqlSession.getMapper(GroupMemberMapper.class);
+                int mess_id = groupMessageStatMapper.getTotalMessagesByGroupId(Integer.parseInt(target));
+
+
+                groupMessageStatMapper.updateTotalMessages(Integer.parseInt(target));
+                content.put("messId", Integer.toString(mess_id));
+
+                GroupMessage groupMessage = new GroupMessage();
+
+                groupMessage.setMessageId(mess_id);
+                groupMessage.setGroupId(Integer.parseInt(target));
+                groupMessage.setSenderId(Integer.parseInt(userid));
+                groupMessage.setContent(message);
+                //1表示文字消息
+                groupMessage.setContentType(1);
+                LocalDateTime now = GlobalVar.toLocalDateTime(new Date());
+                content.put("time", now.toString());
+                groupMessage.setSentTime(now);
+
+                GroupMessageMapper groupMessageMapper = sqlSession.getMapper(GroupMessageMapper.class);
+                groupMessageMapper.insert(groupMessage);
+
+                userIdList.addAll(groupMemberMapper.findUsersByGroupId(Integer.parseInt(target))) ;
+
             });
 
-            MyBatisConfig.execute(GroupMemberMapper.class, mapper -> {
 
-                List<Integer> userIdList = mapper.findUsersByGroupId(Integer.parseInt(target));
-                for (Integer userId : userIdList) {
-                    GlobalVar.sendMessageToUser(Integer.toString(userId), content);
-                }
-            });
+
+            for (Integer userId : userIdList) {
+                System.out.println("current messid: " + content.get("messId"));
+                System.out.println("go throughing group: userId: " + userId);
+                GlobalVar.sendMessageToUser(Integer.toString(userId), content);
+            }
 
 
         });
@@ -74,16 +141,93 @@ public class WebsocketHandler extends SimpleChannelInboundHandler<Object> {
     private void handlerFriendFile(Map<String, String> content, ChannelHandlerContext ctx) {
         String target = content.get("target");
         String userid =  ctx.channel().attr(GlobalVar.USERID).get();
-        String type = content.get("type");
-        String message = content.get("content");
+        System.out.println("userID: " + userid);
+        String fileName = content.get("fileName");
+        content.put("from", userid);
 
 
         GlobalVar.businessExecutor.execute(() ->{
-            content.put("from", userid);
+
+            System.out.println("received friend file");
+
+            MyBatisConfig.execute(sqlSession -> {
+                FriendMessageMapper friendMessageMapper = sqlSession.getMapper(FriendMessageMapper.class);
+                FriendMessageStatMapper friendMessageStatMapper = sqlSession.getMapper(FriendMessageStatMapper.class);
+
+
+                int mess_id = friendMessageStatMapper.getTotal(Integer.parseInt(userid), Integer.parseInt(target));
+                friendMessageStatMapper.updateTotalCount(Integer.parseInt(userid), Integer.parseInt(target));
+
+                content.put("messId", Integer.toString(mess_id));
+
+                FriendMessage friendMessage = new FriendMessage();
+
+                friendMessage.setMessageId(mess_id);
+                friendMessage.setSenderId(Integer.parseInt(userid));
+                friendMessage.setReceiverId(Integer.parseInt(target));
+                friendMessage.setContent(fileName);
+                LocalDateTime now = GlobalVar.toLocalDateTime(new Date());
+                content.put("time", now.toString());
+                friendMessage.setSentTime(now);
+                //2表示文件
+                friendMessage.setContentType(2);
+
+                friendMessageMapper.insert(friendMessage);
+
+
+            });
+            System.out.println("sql Over in frinend file websocket ");
             GlobalVar.sendMessageToUser(target, content);
+
         });
+
     }
     private void handlerGroupFile(Map<String, String> content, ChannelHandlerContext ctx) {
+        String target = content.get("target");
+        String userid =  ctx.channel().attr(GlobalVar.USERID).get();
+        String fileName = content.get("fileName");
+        content.put("from", userid);
+        System.out.println("userID: " + userid);
+        List<Integer> userIdList = new ArrayList<>();
+        GlobalVar.businessExecutor.execute(() ->{
 
+
+
+            MyBatisConfig.execute(sqlSession -> {
+                GroupMessageStatMapper groupMessageStatMapper = sqlSession.getMapper(GroupMessageStatMapper.class);
+                GroupMemberMapper groupMemberMapper = sqlSession.getMapper(GroupMemberMapper.class);
+
+                int mess_id = groupMessageStatMapper.getTotalMessagesByGroupId(Integer.parseInt(target));
+                groupMessageStatMapper.updateTotalMessages(Integer.parseInt(target));
+
+                content.put("messId", Integer.toString(mess_id));
+
+                GroupMessage groupMessage = new GroupMessage();
+
+                groupMessage.setMessageId(mess_id);
+                groupMessage.setGroupId(Integer.parseInt(target));
+                groupMessage.setSenderId(Integer.parseInt(userid));
+                groupMessage.setContent(fileName);
+                //2表示文件消息
+                groupMessage.setContentType(2);
+                LocalDateTime now = GlobalVar.toLocalDateTime(new Date());
+                content.put("time", now.toString());
+                groupMessage.setSentTime(now);
+
+                GroupMessageMapper groupMessageMapper = sqlSession.getMapper(GroupMessageMapper.class);
+                groupMessageMapper.insert(groupMessage);
+
+                userIdList.addAll(groupMemberMapper.findUsersByGroupId(Integer.parseInt(target))) ;
+
+            });
+
+
+
+            for (Integer userId : userIdList) {
+                GlobalVar.sendMessageToUser(Integer.toString(userId), content);
+            }
+
+
+        });
     }
 }

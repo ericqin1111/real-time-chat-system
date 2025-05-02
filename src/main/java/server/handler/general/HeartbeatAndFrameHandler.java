@@ -150,6 +150,7 @@ public class HeartbeatAndFrameHandler extends SimpleChannelInboundHandler<Binary
             byte[] jsonBytes = ByteBufUtil.getBytes(content);
             Map<String, String> dataMap = objectMapper.readValue(jsonBytes,
                     objectMapper.getTypeFactory().constructMapType(HashMap.class, String.class, String.class));
+
             dataMap.put("type", Integer.toString(frameType));
             // 存入上下文
             ctx.channel().attr(GlobalVar.DATA_CONTEXT).set(dataMap);
@@ -164,7 +165,7 @@ public class HeartbeatAndFrameHandler extends SimpleChannelInboundHandler<Binary
     private void handleFileFrame(ChannelHandlerContext ctx, ByteBuf content, int frameType) {
         try {
 
-
+            System.out.println("handling file");
         //1.元数据长度
         int metaLen = content.readInt();
 
@@ -174,12 +175,15 @@ public class HeartbeatAndFrameHandler extends SimpleChannelInboundHandler<Binary
         Map<String, String> dataMap = objectMapper.readValue(metaBytes,
                 objectMapper.getTypeFactory().constructMapType(HashMap.class, String.class, String.class));
         String metaJson = new String(metaBytes, StandardCharsets.UTF_8);
+
+
         dataMap.put("type", Integer.toString(frameType));
+
 
         byte[] bytes = new byte[content.readableBytes()];
         content.readBytes(bytes);
 
-
+            System.out.println("file half");
 
 
         // 生成唯一文件名
@@ -187,7 +191,7 @@ public class HeartbeatAndFrameHandler extends SimpleChannelInboundHandler<Binary
             String uniqueName = generateUniqueFileName(originalName);
             dataMap.remove("fileName");
             dataMap.put("fileName", uniqueName);
-
+            System.out.println("uniquename:" + uniqueName);
             //使用线程池来本地化文件，不过如果本地化失败没有进行反馈，待完善。
             GlobalVar.businessExecutor.execute(() ->{
                 try {
@@ -195,14 +199,17 @@ public class HeartbeatAndFrameHandler extends SimpleChannelInboundHandler<Binary
                     Path uploadPath = Paths.get(GlobalVar.UPLOAD_DIR, uniqueName);
                     Files.createDirectories(uploadPath.getParent());
                     Files.write(uploadPath, bytes);
+                    System.out.println("write over");
                 }catch (Exception e){
                     e.printStackTrace();
                 }
             });
 
-
+            ctx.channel().attr(GlobalVar.DATA_CONTEXT).set(dataMap);
+            ctx.fireChannelRead(content.retain());
         }catch (Exception e){
             System.err.println("JSON parse error: " + e.getMessage());
+            ctx.close();
         }
     }
 

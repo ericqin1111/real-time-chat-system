@@ -50,7 +50,7 @@ public class RouterHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
                 configureWebSocketPipeline(ctx, uri, handlerChainBuilder);
                 // 5. 触发协议升级
                 // 5. 触发协议升级，需保留请求对象
-                GlobalVar.addUserChannel(uri, ctx.channel());
+                GlobalVar.addUserChannel(userid, ctx.channel());
                 ctx.fireChannelRead(request.retain());
 
 
