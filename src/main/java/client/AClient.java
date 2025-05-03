@@ -7,7 +7,7 @@ public class AClient {
     public static void main(String[] args)  {
         try {
             new ChatClient().startClient("A");
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

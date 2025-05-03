@@ -5,12 +5,14 @@ import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolConfig;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import io.netty.handler.ssl.SslContext;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.CharsetUtil;
 import server.GlobalVar;
 import server.handler.RouterConfig;
 import server.handler.utils.JwtUtil;
 
+import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -21,6 +23,11 @@ public class RouterHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
     // 定义路由规则（路径 -> 对应的 Handler 链）
     private static final Map<String, Consumer<ChannelPipeline>> routeMap = RouterConfig.getRouteMap();
 
+    private final SslContext sslContext;
+
+    public RouterHandler(SslContext sslContext) {
+        this.sslContext = sslContext;
+    }
 
 
 
@@ -39,7 +46,8 @@ public class RouterHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
         }
 
         //判断是否为 WebSocket 升级请求
-        if (isWebSocketUpgradeRequest(request)) {
+        if (isWebSocketUpgradeRequest(request)&&
+                ((InetSocketAddress)ctx.channel().localAddress()).getPort() == GlobalVar.HTTPS_PORT) {
             String userid = parseGetParameters(request);
 
             ctx.channel().attr(GlobalVar.USERID).set(userid);
@@ -97,15 +105,19 @@ public class RouterHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
 
     private void configureWebSocketPipeline(ChannelHandlerContext ctx, String path, Consumer<ChannelPipeline> handlerChainBuilder) {
 //        // 动态移除 HTTP 处理器
-
+        ctx.pipeline().remove("httpServerCodec");
+        ctx.pipeline().remove("httpObjectAggregator");
         ctx.pipeline().remove("corsInboundHandler");
         ctx.pipeline().remove("jwtAuthHandler");
         ctx.pipeline().remove("paramsHandler");
         ctx.pipeline().remove(this);
         ctx.pipeline().remove("jsonOutboundEncoder");
 
+        // 2. 添加SSL处理器（如果使用WSS）
+        // 注意：这部分需要从外部传入sslContext或作为类成员变量
+        ctx.pipeline().addLast(sslContext.newHandler(ctx.alloc()));
 
-        // 2. 添加 WebSocket 处理器（支持子协议、扩展和跨域）
+        // 3. 添加 WebSocket 处理器（支持子协议、扩展和跨域）
         WebSocketServerProtocolConfig config = WebSocketServerProtocolConfig.newBuilder()
                 .websocketPath(path)            // 路径
                 .allowExtensions(true)         // 允许扩展

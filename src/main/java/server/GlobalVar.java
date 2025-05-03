@@ -26,6 +26,7 @@ public class GlobalVar {
     public static final String USER = "root";
     public static final String PASS = "123456";
     public static final int SERVER_PORT = 8080;
+    public static final int HTTPS_PORT = 8443;
     public static final String ALLOWED_PORT = "8090";
     public static final String UPLOAD_DIR = "upload/";
     //websocketframe数据
