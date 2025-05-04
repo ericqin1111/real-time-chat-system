@@ -36,13 +36,16 @@ public class CorsInboundHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
+
+            System.out.println("cors in :" + request.method() + " " + request.uri());
         // 处理预检请求（OPTIONS）
         if (request.method().equals(HttpMethod.OPTIONS)) {
             int port = ((InetSocketAddress) ctx.channel().localAddress()).getPort();
-            FullHttpResponse response = (port==8443)?
+            FullHttpResponse response = (port==GlobalVar.HTTPS_PORT)?
                     PRECONFIGURED_OPTIONS_RESPONSE_HTTP.retainedDuplicate()
                     :PRECONFIGURED_OPTIONS_RESPONSE_HTTPS.retainedDuplicate()
                     ; // 复制并保留引用
+
             ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
             return;
         }

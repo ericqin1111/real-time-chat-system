@@ -18,17 +18,23 @@ public class WebsocketHandler extends SimpleChannelInboundHandler<Object> {
 
         String type = content.get("type");
         System.out.println("contentType:" + type);
+        //给好友发送消息
         if (type.equals("2")) {
             System.out.println("handleFriendmessage");
             handlerFriend(content, ctx);
-        }else if (type.equals("3")) {
+        }
+        //给群组发送消息
+        else if (type.equals("3")) {
             System.out.println("handleGroupmessage");
             handlerGroup(content, ctx);
         }
+        //给好友发送文件
         else if (type.equals("4")) {
             System.out.println("handleFriendFile");
             handlerFriendFile(content, ctx);
-        }else if (type.equals("5")) {
+        }
+        //给群组发送文件
+        else if (type.equals("5")) {
             System.out.println("handleGroupFile");
             handlerGroupFile(content, ctx);
         }
@@ -40,7 +46,7 @@ public class WebsocketHandler extends SimpleChannelInboundHandler<Object> {
         System.out.println("userID: " + userid);
         String message = content.get("content");
         content.put("from", userid);
-
+        content.put("mainbody", userid);
 
         GlobalVar.businessExecutor.execute(() ->{
 
@@ -51,8 +57,16 @@ public class WebsocketHandler extends SimpleChannelInboundHandler<Object> {
                 FriendMessageStatMapper friendMessageStatMapper = sqlSession.getMapper(FriendMessageStatMapper.class);
 
                 System.out.println("Mappers start");
-                int mess_id = friendMessageStatMapper.getTotal(Integer.parseInt(userid), Integer.parseInt(target));
-                friendMessageStatMapper.updateTotalCount(Integer.parseInt(userid), Integer.parseInt(target));
+                //保证第一个id小于第二个id
+                int first = Integer.parseInt(userid);
+                int second = Integer.parseInt(target);
+                if (first > second) {
+                    int mid = first;
+                    first = second;
+                    second = mid;
+                }
+                int mess_id = friendMessageStatMapper.getTotal(first, second);
+                friendMessageStatMapper.updateTotalCount(first,second);
                 System.out.println("friendMapper Ok");
 
                 content.put("messId", Integer.toString(mess_id));
@@ -77,6 +91,7 @@ public class WebsocketHandler extends SimpleChannelInboundHandler<Object> {
             });
             System.out.println("readyToSend");
             GlobalVar.sendMessageToUser(target, content);
+            GlobalVar.sendMessageToUser(userid, content);
 
         });
 
@@ -90,6 +105,8 @@ public class WebsocketHandler extends SimpleChannelInboundHandler<Object> {
         System.out.println("userID: " + userid);
         String message = content.get("content");
         content.put("from", userid);
+        content.put("mainbody", userid);
+
 
         List<Integer> userIdList = new ArrayList<>();
         GlobalVar.businessExecutor.execute(() ->{
@@ -144,7 +161,7 @@ public class WebsocketHandler extends SimpleChannelInboundHandler<Object> {
         System.out.println("userID: " + userid);
         String fileName = content.get("fileName");
         content.put("from", userid);
-
+        content.put("mainbody", userid);
 
         GlobalVar.businessExecutor.execute(() ->{
 
@@ -155,8 +172,17 @@ public class WebsocketHandler extends SimpleChannelInboundHandler<Object> {
                 FriendMessageStatMapper friendMessageStatMapper = sqlSession.getMapper(FriendMessageStatMapper.class);
 
 
-                int mess_id = friendMessageStatMapper.getTotal(Integer.parseInt(userid), Integer.parseInt(target));
-                friendMessageStatMapper.updateTotalCount(Integer.parseInt(userid), Integer.parseInt(target));
+                //保证第一个id小于第二个id
+                int first = Integer.parseInt(userid);
+                int second = Integer.parseInt(target);
+                if (first > second) {
+                    int mid = first;
+                    first = second;
+                    second = mid;
+                }
+                int mess_id = friendMessageStatMapper.getTotal(first, second);
+                friendMessageStatMapper.updateTotalCount(first,second);
+                System.out.println("friendMapper Ok");
 
                 content.put("messId", Integer.toString(mess_id));
 
@@ -178,6 +204,7 @@ public class WebsocketHandler extends SimpleChannelInboundHandler<Object> {
             });
             System.out.println("sql Over in frinend file websocket ");
             GlobalVar.sendMessageToUser(target, content);
+            GlobalVar.sendMessageToUser(userid, content);
 
         });
 
@@ -187,6 +214,8 @@ public class WebsocketHandler extends SimpleChannelInboundHandler<Object> {
         String userid =  ctx.channel().attr(GlobalVar.USERID).get();
         String fileName = content.get("fileName");
         content.put("from", userid);
+        content.put("mainbody", userid);
+
         System.out.println("userID: " + userid);
         List<Integer> userIdList = new ArrayList<>();
         GlobalVar.businessExecutor.execute(() ->{
