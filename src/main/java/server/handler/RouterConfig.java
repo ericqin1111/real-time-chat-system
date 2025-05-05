@@ -4,6 +4,7 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import lombok.Getter;
 import server.handler.auth.RegisterHandler;
+import server.handler.chatroom.ChatHandler;
 import server.handler.example.ExampleHandler;
 import server.handler.example.ThreadPoolTestHandler;
 import server.handler.example.WSExampleHandler;
@@ -45,6 +46,10 @@ public class RouterConfig {
         routeMap.put("/file", pipeline ->{
             pipeline.addLast(new ChunkedWriteHandler());
             pipeline.addLast(new FileHandler());
+        });
+
+        routeMap.put("/users/chat",pipeline -> {
+            pipeline.addLast(new ChatHandler());
         });
 
 

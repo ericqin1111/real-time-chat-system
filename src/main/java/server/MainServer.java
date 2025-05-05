@@ -110,7 +110,7 @@ public class MainServer {
         MyBatisConfig.init();
         SslContext sslContext = createSslContext();
 
-        new MainServer(GlobalVar.HTTPS_PORT,sslContext).run();
+        new MainServer(GlobalVar.SERVER_PORT,sslContext).run();
 
     }
 }

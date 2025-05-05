@@ -36,8 +36,9 @@ public class LoginHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             }
             else {
                 Integer userId = user.getUserId();
+
                 String token= JwtUtil.createToken(Integer.toString(userId));
-                sendSuccessResponse(ctx,token);
+                sendSuccessResponse(ctx,token,userId,username);
             }
 
 
@@ -57,21 +58,34 @@ public class LoginHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     }
 
     private void sendErrorResponse(ChannelHandlerContext ctx, String errorMessage) {
+        JSONObject responseJson = new JSONObject();
+        responseJson.put("errorMessage",errorMessage);
+        String responseBody = responseJson.toString();
+
         FullHttpResponse response = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1,
                 HttpResponseStatus.UNAUTHORIZED,
-                Unpooled.wrappedBuffer(errorMessage.getBytes())
+                Unpooled.wrappedBuffer(responseBody.getBytes())
         );
+
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
         response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
         ctx.writeAndFlush(response);
     }
 
-    private void sendSuccessResponse(ChannelHandlerContext ctx,String token) {
+    private void sendSuccessResponse(ChannelHandlerContext ctx, String token, Integer userId, String username) {
+        // 1. 创建 JSON 对象
+        JSONObject responseJson = new JSONObject();
+        responseJson.put("token", token);
+        responseJson.put("userId", userId);
+        responseJson.put("username", username);
+
+        // 2. 转为字符串
+        String responseBody = responseJson.toString();
         FullHttpResponse response = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1,
                 HttpResponseStatus.OK,
-                Unpooled.wrappedBuffer(token.getBytes())
+                Unpooled.wrappedBuffer(responseBody.getBytes(CharsetUtil.UTF_8))
         );
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
         response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());

@@ -73,7 +73,7 @@ public class WebsocketHandler extends SimpleChannelInboundHandler<Object> {
 
                 FriendMessage friendMessage = new FriendMessage();
 
-                friendMessage.setMessageId(mess_id);
+//                friendMessage.setMessageId(mess_id);
                 friendMessage.setSenderId(Integer.parseInt(userid));
                 friendMessage.setReceiverId(Integer.parseInt(target));
                 friendMessage.setContent(message);

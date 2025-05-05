@@ -25,7 +25,9 @@ public class CorsInboundHandler extends SimpleChannelInboundHandler<FullHttpRequ
                     HttpResponseStatus.NO_CONTENT,
                     Unpooled.unreleasableBuffer(Unpooled.EMPTY_BUFFER)); // 创建不可释放的 Buffer}
             response.headers()
-                .set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, protocol + "://localhost:" + GlobalVar.ALLOWED_PORT)
+                    .set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN,  "http://localhost:" + GlobalVar.ALLOWED_PORT)
+
+//                .set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, protocol + "://localhost:" + GlobalVar.ALLOWED_PORT)
                 .set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_METHODS, "GET, POST, PUT, DELETE, OPTIONS")
                 .set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS, "Content-Type, Authorization")
                 .set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
