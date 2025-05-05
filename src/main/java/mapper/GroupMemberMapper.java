@@ -15,6 +15,11 @@ public interface GroupMemberMapper extends BaseMapper<GroupMember> {
     @Select("SELECT group_id FROM group_members WHERE user_id = #{userId}")
     List<Integer> findGroupIdsByUserId(@Param("userId") int userId);
 
+    @Select("    SELECT COUNT(*)\n" +
+            "    FROM group_members\n" +
+            "    WHERE user_id = #{userId} AND group_id = #{groupId}\n" +
+            "    LIMIT 1")
+    Integer isUserInGroup(@Param("userId") int userId, @Param("groupId") int groupId);
 
     @Select("SELECT COUNT(*) FROM group_members WHERE user_id = #{userId} AND group_id = #{groupId}")
     Integer countUserInGroup(@Param("userId") int userId, @Param("groupId") int groupId);

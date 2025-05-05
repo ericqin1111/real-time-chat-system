@@ -35,8 +35,8 @@ public interface FriendMessageMapper extends BaseMapper<FriendMessage> {
             "LIMIT #{limit} OFFSET #{offset}")
     List<FriendMessage> findMessagesBetweenUsers(@Param("userId1") int userId1,
                                                  @Param("userId2") int userId2,
-                                                 @Param("offset") int offset,
-                                                 @Param("limit") int limit);
+                                                 @Param("limit") int limit,
+                                                @Param("offset") int offset);
 
     /**
      * (可选) 查询两个用户之间的最后一条聊天记录。

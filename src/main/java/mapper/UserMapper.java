@@ -36,6 +36,7 @@ public interface UserMapper extends BaseMapper<User> {
         // 当方法参数是集合且在动态 SQL 中使用时，强烈建议使用 @Param 注解指定名称
     List<User> findUsersByIds(@Param("ids") List<Integer> ids);
 
+
     @Insert("insert into users (username,password) values (#{username},#{password} )")
     void insertUser(String username,String password);
 }

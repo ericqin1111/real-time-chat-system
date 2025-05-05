@@ -5,6 +5,7 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 import lombok.Getter;
 import server.handler.auth.RegisterHandler;
 import server.handler.chatroom.ChatHandler;
+import server.handler.chatroom.MessageHandler;
 import server.handler.example.ExampleHandler;
 import server.handler.example.ThreadPoolTestHandler;
 import server.handler.example.WSExampleHandler;
@@ -33,6 +34,9 @@ public class RouterConfig {
             pipeline.addLast(new ThreadPoolTestHandler());
         });
 
+        routeMap.put("/api/users",pipeline -> {
+            pipeline.addLast(new MessageHandler());
+        });
 
 
         routeMap.put("/login",pipeline ->{
