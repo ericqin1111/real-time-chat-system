@@ -10,6 +10,7 @@ import server.GlobalVar;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class WebsocketHandler extends SimpleChannelInboundHandler<Object> {
     @Override
@@ -41,6 +42,8 @@ public class WebsocketHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     private void handlerFriend(Map<String, String> content, ChannelHandlerContext ctx) {
+
+
         String target = content.get("target");
         String userid =  ctx.channel().attr(GlobalVar.USERID).get();
         System.out.println("userID: " + userid);

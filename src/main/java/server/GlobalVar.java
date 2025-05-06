@@ -7,6 +7,7 @@ import io.netty.util.AttributeKey;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
@@ -33,7 +34,7 @@ public class GlobalVar {
     public static final AttributeKey<Map<String, String>> DATA_CONTEXT =
             AttributeKey.valueOf("dataContext");
     //全局用户websockerchannel
-    private static final ConcurrentHashMap<String, UserChannelInfo> userChannelMap = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, UserChannelInfo> userChannelMap = new ConcurrentHashMap<>();
 
     public static final ExecutorService businessExecutor = createBusinessExecutor();
     private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
@@ -139,6 +140,9 @@ public class GlobalVar {
 
     public static void sendMessageToUser(String userId, Object msg) {
         UserChannelInfo info = userChannelMap.get(userId);
+
+
+
         System.out.println("send to:" + userId);
         if (info != null) {
             ReentrantLock lock = info.getLock();

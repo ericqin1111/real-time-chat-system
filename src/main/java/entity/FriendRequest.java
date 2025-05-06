@@ -1,8 +1,6 @@
 package entity;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -10,6 +8,9 @@ import java.time.LocalDateTime;
 @Data
 @TableName("friend_requests")
 public class FriendRequest {
+    @TableId(value = "id", type = IdType.AUTO) // <--- 修改这里
+    private Integer id;
+
     @TableField("requester_id")
     private Integer requesterId;
 
@@ -21,4 +22,7 @@ public class FriendRequest {
 
     @TableField(value = "created_at", fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
+
+    @TableField("requester_name")
+    private String requesterName;
 }

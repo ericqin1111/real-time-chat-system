@@ -5,6 +5,7 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 import lombok.Getter;
 import server.handler.auth.RegisterHandler;
 import server.handler.chatroom.ChatHandler;
+import server.handler.chatroom.FriendRequestOperationsHandler;
 import server.handler.chatroom.MessageHandler;
 import server.handler.example.ExampleHandler;
 import server.handler.example.ThreadPoolTestHandler;
@@ -38,6 +39,10 @@ public class RouterConfig {
             pipeline.addLast(new MessageHandler());
         });
 
+
+        routeMap.put("/api/social",pipeline -> {
+            pipeline.addLast(new FriendRequestOperationsHandler());
+        });
 
         routeMap.put("/login",pipeline ->{
             pipeline.addLast(new LoginHandler());

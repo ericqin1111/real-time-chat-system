@@ -17,10 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 
 // 导入你的工具、配置、Mapper、实体和 DTO
@@ -35,12 +32,15 @@ import server.GlobalVar; // 假设业务线程池在这里
 // @ChannelHandler.Sharable // 如果设计为无状态可共享
 public class ChatHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
+
     private static final ExecutorService businessExecutor = GlobalVar.businessExecutor; // 获取业务线程池
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
         HttpHeaders headers = request.headers();
         String uri = request.uri();
+
+
 
         // 1. 校验方法和路径前缀 (可选，取决于你的 RouterHandler 是否已做)
 //        if (request.method() != HttpMethod.GET || !uri.startsWith("/api/users/")) {

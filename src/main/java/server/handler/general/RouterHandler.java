@@ -50,7 +50,7 @@ public class RouterHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
              &&   ((InetSocketAddress)ctx.channel().localAddress()).getPort() == GlobalVar.HTTPS_PORT
                 ) {
             String userid = parseGetParameters(request);
-
+            System.out.println("我进入了web处理链");
             ctx.channel().attr(GlobalVar.USERID).set(userid);
             // 3. 获取对应的处理器链配置
             Consumer<ChannelPipeline> handlerChainBuilder = routeMap.get(uri);
