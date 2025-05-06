@@ -13,6 +13,27 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class WebsocketHandler extends SimpleChannelInboundHandler<Object> {
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        // WebSocket 连接已关闭
+        String userid =  ctx.channel().attr(GlobalVar.USERID).get();
+        GlobalVar.removeUserChannel(userid);
+        System.out.println("WebSocket 连接已关闭: " + ctx.channel().remoteAddress());
+        super.channelInactive(ctx);
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        // 异常关闭（如网络中断）
+        String userid =  ctx.channel().attr(GlobalVar.USERID).get();
+        GlobalVar.removeUserChannel(userid);
+        System.out.println("WebSocket 异常关闭: " + cause.getMessage());
+        ctx.close();
+    }
+
+
+
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
         Map<String, String> content = ctx.channel().attr(GlobalVar.DATA_CONTEXT).get();

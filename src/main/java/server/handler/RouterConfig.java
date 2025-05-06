@@ -12,6 +12,7 @@ import server.handler.example.ThreadPoolTestHandler;
 import server.handler.example.WSExampleHandler;
 import server.handler.auth.LoginHandler;
 import server.handler.file.FileHandler;
+import server.handler.websocket.OnlineHandler;
 import server.handler.websocket.WebsocketHandler;
 
 import java.util.HashMap;
@@ -39,10 +40,6 @@ public class RouterConfig {
             pipeline.addLast(new MessageHandler());
         });
 
-
-        routeMap.put("/api/social",pipeline -> {
-            pipeline.addLast(new FriendRequestOperationsHandler());
-        });
 
         routeMap.put("/login",pipeline ->{
             pipeline.addLast(new LoginHandler());
