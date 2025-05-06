@@ -40,6 +40,9 @@ public class RouterConfig {
             pipeline.addLast(new MessageHandler());
         });
 
+        routeMap.put("/online",pipeline -> {
+            pipeline.addLast(new OnlineHandler());
+        });
 
         routeMap.put("/login",pipeline ->{
             pipeline.addLast(new LoginHandler());
