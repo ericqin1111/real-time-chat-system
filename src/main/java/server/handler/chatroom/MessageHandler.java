@@ -153,27 +153,35 @@ public class MessageHandler extends SimpleChannelInboundHandler<FullHttpRequest>
     private void handleGetGroupMessages(ChannelHandlerContext ctx, HttpHeaders headers, int userId, int groupId, int limit, int offset) {
         businessExecutor.submit(() -> { // 异步执行
             try {
+                System.out.println("Group1");
                 // 1. (可选但推荐) 验证用户是否是群成员
                 Integer count = MyBatisConfig.executeQuery(GroupMemberMapper.class, m -> m.isUserInGroup(userId, groupId));
                 boolean isMember = (count != null && count > 0);
                 if (!isMember) {
+                    System.out.println("Group2");
                     ctx.channel().eventLoop().execute(() -> {
                         sendErrorResponse(ctx, HttpResponseStatus.FORBIDDEN, "Not a member of this group.", headers);
                     });
                     return;
                 }
 
+                System.out.println("Group3");
                 // 2. 获取群消息
                 List<GroupMessage> messages = MyBatisConfig.executeQuery(GroupMessageMapper.class,
                         m -> m.findMessagesByGroupId(groupId, limit, offset)); // 传递分页参数
 
+                System.out.println("GroupMessages:"+messages);
+                System.out.println("Group4");
                 // 3. 批量获取发送者信息
                 List<Integer> senderIds = messages.stream().map(GroupMessage::getSenderId).distinct().collect(Collectors.toList());
                 Map<Integer, User> senderMap = Collections.emptyMap();
+                System.out.println("GroupMessages:"+senderIds);
                 if (!senderIds.isEmpty()) {
                     senderMap = MyBatisConfig.executeQuery(UserMapper.class, m -> m.findUsersByIds(senderIds))
                             .stream().collect(Collectors.toMap(User::getUserId, u -> u));
                 }
+
+                System.out.println("Group5");
 
                 // 4. 转换 DTO, 设置 isMe 和发送者信息
                 Map<Integer, User> finalSenderMap = senderMap; // Lambda final
@@ -197,6 +205,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<FullHttpRequest>
                     return dto;
                 }).collect(Collectors.toList());
 
+                System.out.println("Group6");
                 // 5. 发送 JSON 响应
                 String responseJson = new JSONArray(messageDTOs).toString();
                 ctx.channel().eventLoop().execute(() -> {

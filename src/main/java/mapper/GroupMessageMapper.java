@@ -31,8 +31,9 @@ public interface GroupMessageMapper extends BaseMapper<GroupMessage> {
             "ORDER BY sent_time DESC " +
             "LIMIT #{limit} OFFSET #{offset}")
     List<GroupMessage> findMessagesByGroupId(@Param("groupId") int groupId,
-                                             @Param("offset") int offset,
-                                             @Param("limit") int limit);
+                                             @Param("limit") int limit,
+                                             @Param("offset") int offset);
+
 
     /**
      * (可选) 查询指定群组的最后一条聊天记录。

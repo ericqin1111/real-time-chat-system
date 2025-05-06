@@ -124,7 +124,7 @@ public class WebsocketHandler extends SimpleChannelInboundHandler<Object> {
 
                 GroupMessage groupMessage = new GroupMessage();
 
-                groupMessage.setMessageId(mess_id);
+//                groupMessage.setMessageId(mess_id);
                 groupMessage.setGroupId(Integer.parseInt(target));
                 groupMessage.setSenderId(Integer.parseInt(userid));
                 groupMessage.setContent(message);
