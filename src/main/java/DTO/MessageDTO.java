@@ -1,6 +1,8 @@
 package DTO;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
 public class MessageDTO {
@@ -12,7 +14,11 @@ public class MessageDTO {
     private String time; // 格式化的时间字符串;
     private boolean isMe; // **由后端根据请求者计算**
     private int contentType; // 1:文本, 2:文件, 3:图片...
-    private FileInfoDTO fileInfo; // 可选，文件信息 (url, size, name)
+
+    @Getter
+    @Setter
+    private String fileName; // 可选，文件信息 (url, size, name)
+
     // Getters and Setters...
 }
 

@@ -26,4 +26,7 @@ public class FriendMessage {
 
     @TableField("content_type")
     private Integer contentType;
+
+    @TableField("store_filename")
+    private String fileName;
 }

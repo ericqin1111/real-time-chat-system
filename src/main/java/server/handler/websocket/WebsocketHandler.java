@@ -45,6 +45,8 @@ public class WebsocketHandler extends SimpleChannelInboundHandler<Object> {
         String userid =  ctx.channel().attr(GlobalVar.USERID).get();
         System.out.println("userID: " + userid);
         String message = content.get("content");
+        String contentType=content.get("contentType");
+        System.out.println("contenttype:");
         content.put("from", userid);
         content.put("mainbody", userid);
 
@@ -188,7 +190,7 @@ public class WebsocketHandler extends SimpleChannelInboundHandler<Object> {
 
                 FriendMessage friendMessage = new FriendMessage();
 
-                friendMessage.setMessageId(mess_id);
+//                friendMessage.setMessageId(mess_id);
                 friendMessage.setSenderId(Integer.parseInt(userid));
                 friendMessage.setReceiverId(Integer.parseInt(target));
                 friendMessage.setContent(fileName);
@@ -233,10 +235,12 @@ public class WebsocketHandler extends SimpleChannelInboundHandler<Object> {
 
                 GroupMessage groupMessage = new GroupMessage();
 
-                groupMessage.setMessageId(mess_id);
+//                groupMessage.setMessageId(mess_id);
                 groupMessage.setGroupId(Integer.parseInt(target));
                 groupMessage.setSenderId(Integer.parseInt(userid));
                 groupMessage.setContent(fileName);
+
+                System.out.println("File:"+fileName);
                 //2表示文件消息
                 groupMessage.setContentType(2);
                 LocalDateTime now = GlobalVar.toLocalDateTime(new Date());

@@ -116,6 +116,11 @@ public class MessageHandler extends SimpleChannelInboundHandler<FullHttpRequest>
                     dto.setMessageId(msg.getMessageId());
                     dto.setSenderId(msg.getSenderId());
                     dto.setContent(msg.getContent());
+//                    dto.setContentType(msg.getContentType());
+//
+//                    if(dto.getContentType()==2){
+//                        dto.setFileName(msg.getFileName());
+//                    }
                     dto.setTime(msg.getSentTime() != null ? msg.getSentTime().atZone(ZoneId.systemDefault()).toInstant().toString() : null);
                     Integer contentTypeFromDb = msg.getContentType(); // 先获取 Integer 类型的值
                     int contentTypeValue = 1; // 设置一个默认值，例如 1 代表文本
