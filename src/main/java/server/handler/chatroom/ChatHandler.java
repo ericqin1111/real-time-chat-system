@@ -42,14 +42,6 @@ public class ChatHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
 
 
-        // 1. 校验方法和路径前缀 (可选，取决于你的 RouterHandler 是否已做)
-//        if (request.method() != HttpMethod.GET || !uri.startsWith("/api/users/")) {
-//            sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, "Invalid request for ChatHandler.", headers);
-//            return;
-//        }
-
-        // 2. 从 URI 中解析 userId
-
         int userId=Integer.parseInt(ctx.channel().attr(GlobalVar.USERID).get());
         System.out.println("ChatHandler: Requesting chat list for user ID: " + userId);
 
@@ -136,29 +128,6 @@ public class ChatHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         });
     }
 
-    // --- 辅助方法 ---
-
-    // 修改: 不再需要 authenticate，直接从路径解析 userId
-    // private Integer authenticate(HttpHeaders headers) { ... }
-
-    // 从 URI 解析 userId (示例，你需要根据你的确切路径调整)
-    // 例如解析 /api/users/123/chats -> 123
-//    private Integer extractUserIdFromChatUri(String uri) {
-//        try {
-//            // 假设路径格式固定为 /users/{userId}/chats
-//            String prefix = "/users/";
-//            String suffix = "/chats";
-//            if (uri.startsWith(prefix) && uri.endsWith(suffix)) {
-//                // 提取中间的 ID 部分
-//                String idStr = uri.substring(prefix.length(), uri.length() - suffix.length());
-//                return Integer.parseInt(idStr);
-//            }
-//            return null; // 格式不匹配
-//        } catch (Exception e) {
-//            System.err.println("ChatHandler: Failed to parse userId from URI: " + uri + " - " + e.getMessage());
-//            return null; // 解析失败
-//        }
-//    }
 
 
     private void sendJsonResponse(ChannelHandlerContext ctx, HttpResponseStatus status, String jsonBody, HttpHeaders requestHeaders) {
