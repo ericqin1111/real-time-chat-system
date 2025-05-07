@@ -93,6 +93,16 @@ public class FriendRequestOperationsHandler extends SimpleChannelInboundHandler<
                 } catch (NumberFormatException e) { sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, "路径用户ID无效", headers); }
                 return;
             }
+
+            matcher = DECLINE_REQUEST_PATTERN.matcher(uri);
+            if (matcher.matches()) {
+                try {
+                    int currentUserId = Integer.parseInt(matcher.group(1));
+                    int requestId = Integer.parseInt(matcher.group(2));
+                    handleDeclineRequest(ctx, headers, requestId, currentUserId); // 需要手动事务
+                } catch (NumberFormatException e) { sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, "路径ID无效", headers); }
+                return;
+            }
         } else if (method.equals(HttpMethod.POST)) {
             System.out.println("1111111111111111111111111111");
             matcher = SEND_REQUEST_PATTERN.matcher(uri);
@@ -115,15 +125,7 @@ public class FriendRequestOperationsHandler extends SimpleChannelInboundHandler<
                 return;
             }
             System.out.println("333333333333333333");
-            matcher = DECLINE_REQUEST_PATTERN.matcher(uri);
-            if (matcher.matches()) {
-                try {
-                    int currentUserId = Integer.parseInt(matcher.group(1));
-                    int requestId = Integer.parseInt(matcher.group(2));
-                    handleDeclineRequest(ctx, headers, requestId, currentUserId); // 需要手动事务
-                } catch (NumberFormatException e) { sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, "路径ID无效", headers); }
-                return;
-            }
+
         }
 
         logger.debug("未匹配的FriendRequestOperationsHandler请求: {} {}", method, uri);
