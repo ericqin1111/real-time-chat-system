@@ -50,7 +50,7 @@ public class RouterHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
              &&   ((InetSocketAddress)ctx.channel().localAddress()).getPort() == GlobalVar.HTTPS_PORT
                 ) {
             String userid = parseGetParameters(request);
-
+            System.out.println("我进入了web处理链");
             ctx.channel().attr(GlobalVar.USERID).set(userid);
             // 3. 获取对应的处理器链配置
             Consumer<ChannelPipeline> handlerChainBuilder = routeMap.get(uri);
@@ -108,10 +108,10 @@ public class RouterHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
 //        // 动态移除 HTTP 处理器
 
 
-        // 不要移除这两个东西，否则响应都发不出去！！！！！！！！！！！！！！！！！！！！！！！！！！
+        // 不要移除这个东西，否则响应都发不出去！！！！！！！！！！！！！！！！！！！！！！！！！！
 
 //        ctx.pipeline().remove("httpServerCodec");
-//        ctx.pipeline().remove("httpObjectAggregator");
+         ctx.pipeline().remove("httpObjectAggregator");
         ctx.pipeline().remove("corsInboundHandler");
         ctx.pipeline().remove("jwtAuthHandler");
         ctx.pipeline().remove("paramsHandler");

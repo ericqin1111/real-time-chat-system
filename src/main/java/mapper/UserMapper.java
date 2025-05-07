@@ -14,11 +14,14 @@ import java.util.List;
 public interface UserMapper extends BaseMapper<User> {
     @Select("select * from users")
     List<User> getAll();
+
+    @Select("SELECT user_id, username FROM users WHERE user_id = #{userId}")
+    User findUserById(@Param("userId") Integer userId);
     @Select("select * from users WHERE USERNAME = #{username}")
     User findUserByUsername(@Param("username") String username);
 
-    @Select("select * from users where user_id = #{userId}")
-    User findUserById(@Param("userId") String userId);
+//    @Select("select * from users where user_id = #{userId}")
+//    User findUserById(@Param("userId") String userId);
 
     @Select("<script>" +
             "SELECT * FROM users " + // 将 'your_user_table' 替换为你的实际用户表名

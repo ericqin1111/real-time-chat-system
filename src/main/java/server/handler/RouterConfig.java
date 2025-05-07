@@ -5,12 +5,14 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 import lombok.Getter;
 import server.handler.auth.RegisterHandler;
 import server.handler.chatroom.ChatHandler;
+import server.handler.chatroom.FriendRequestOperationsHandler;
 import server.handler.chatroom.MessageHandler;
 import server.handler.example.ExampleHandler;
 import server.handler.example.ThreadPoolTestHandler;
 import server.handler.example.WSExampleHandler;
 import server.handler.auth.LoginHandler;
 import server.handler.file.FileHandler;
+import server.handler.websocket.OnlineHandler;
 import server.handler.websocket.WebsocketHandler;
 
 import java.util.HashMap;
@@ -38,6 +40,9 @@ public class RouterConfig {
             pipeline.addLast(new MessageHandler());
         });
 
+        routeMap.put("/online",pipeline -> {
+            pipeline.addLast(new OnlineHandler());
+        });
 
         routeMap.put("/login",pipeline ->{
             pipeline.addLast(new LoginHandler());

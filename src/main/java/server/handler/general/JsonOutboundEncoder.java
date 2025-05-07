@@ -1,6 +1,8 @@
 package server.handler.general;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
@@ -13,7 +15,16 @@ import java.util.Map;
 
 public class JsonOutboundEncoder extends ChannelOutboundHandlerAdapter {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+//    private static final ObjectMapper MAPPER = new ObjectMapper();
+private static final ObjectMapper MAPPER = createObjectMapper();
+
+    private static ObjectMapper createObjectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule()); // <--- 注册模块
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        // mapper.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); // 可选配置
+        return mapper;
+    }
 
 
     @Override

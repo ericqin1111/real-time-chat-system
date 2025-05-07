@@ -58,6 +58,7 @@ public class HeartbeatAndFrameHandler extends SimpleChannelInboundHandler<Binary
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
         // 处理空闲事件
+        System.out.println("receive idle event: " + evt);
         if (evt instanceof IdleStateEvent) {
             IdleStateEvent event = (IdleStateEvent) evt;
             switch (event.state()) {

@@ -26,6 +26,16 @@ public class MyBatisConfig {
 
     private static SqlSessionFactory sqlSessionFactory;
 
+    public static SqlSessionFactory getSqlSessionFactory() {
+        if (sqlSessionFactory == null) {
+            // logger.error("MyBatis SqlSessionFactory 尚未初始化!");
+            throw new IllegalStateException("MyBatis SqlSessionFactory 尚未初始化!");
+        }
+        return sqlSessionFactory;
+    }
+
+
+
     // 初始化数据库配置（单例模式）
     public static void init() {
         try {
