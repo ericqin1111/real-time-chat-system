@@ -53,6 +53,7 @@ public class  ParamsHandler extends SimpleChannelInboundHandler<FullHttpRequest>
 
         // 根据 Content-Type 解析参数
         String contentType = request.headers().get(HttpHeaderNames.CONTENT_TYPE);
+        System.out.println("contentType: " + contentType);
         if (contentType.startsWith(HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED.toString())) {
             // 解析表单数据（如 name=John&age=30）
             String formData = content.toString(CharsetUtil.UTF_8);
